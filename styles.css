@@ -4,10 +4,10 @@
     box-sizing: border-box;
 }
 
-/* Use a fallback font instead of the custom Minecraft font */
+/* Use only system fonts instead of the custom Minecraft font */
 @font-face {
     font-family: 'Minecraft';
-    src: url('https://dl.dafont.com/dl/?f=minecraft') format('truetype');
+    src: local('Courier New');
     font-weight: normal;
     font-style: normal;
 }
@@ -102,6 +102,37 @@ body {
     flex-direction: column;
     justify-content: flex-start; /* Align to top */
     align-items: stretch; /* Fill width */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect x="0" y="0" width="100" height="100" fill="%231c2733"/><rect x="0" y="0" width="50" height="50" fill="%23232f3e"/><rect x="50" y="50" width="50" height="50" fill="%23232f3e"/></svg>');
+    background-size: 20px 20px;
+}
+
+.start-screen-instructions {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.start-screen-instructions h3 {
+    color: #55aa55;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.start-screen-instructions ul {
+    text-align: left;
+    margin: 0;
+    padding-left: 25px;
+}
+
+.start-screen-instructions li {
+    margin-bottom: 8px;
+    line-height: 1.5;
 }
 
 #hud {
@@ -130,7 +161,7 @@ body {
 
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 h1 {

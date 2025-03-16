@@ -14,6 +14,8 @@ const gameState = {
 
 // Initialize the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM content loaded, initializing game...");
+
     // Hide the loading screen after a short delay
     const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
@@ -25,11 +27,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 800);
     }
     
+    // Add game animations
+    addGameAnimations();
+    
     // Set up character selection
     setupCharacterSelection();
     
     // Initialize audio
     initializeAudio();
+
+    // Auto-select first character after a short delay to help with testing
+    setTimeout(() => {
+        const firstCharacter = document.querySelector('.character');
+        if (firstCharacter && !gameState.character) {
+            firstCharacter.click();
+        }
+    }, 1000);
 });
 
 // Set up character selection
@@ -88,27 +101,45 @@ function setupCharacterSelection() {
 
 // Start the game
 function startGame() {
+    console.log("Starting game with character:", gameState.character);
+    
     // Hide start screen and show game screen
     const startScreen = document.getElementById('start-screen');
     const gameScreen = document.getElementById('game-screen');
     
-    if (startScreen) startScreen.classList.add('hidden');
-    if (gameScreen) gameScreen.classList.remove('hidden');
+    // Reset game state
+    resetGame();
+    
+    // Make sure the game screen is visible before doing anything else
+    if (startScreen) {
+        startScreen.style.display = 'none';
+        startScreen.classList.add('hidden');
+    }
+    
+    if (gameScreen) {
+        gameScreen.style.display = 'flex';
+        gameScreen.classList.remove('hidden');
+    }
     
     // Update character name display
     const characterNameDisplay = document.getElementById('character-name');
     if (characterNameDisplay) {
-        characterNameDisplay.textContent = gameState.character;
+        characterNameDisplay.textContent = gameState.character || "Engineer";
     }
-    
-    // Reset game state
-    resetGame();
     
     // Add the player character
     addPlayerCharacter();
     
+    // Double check that game objects exist
+    const gameArea = document.getElementById('game-area');
+    if (!gameArea) {
+        console.error("Game area not found! Cannot start game.");
+        return;
+    }
+    
     // Start the game
     gameState.isPlaying = true;
+    console.log("Game started successfully");
     
     // Start background music if available
     if (window.gameAudio && window.gameAudio.background) {
@@ -167,6 +198,9 @@ function addPlayerCharacter() {
     character.style.position = 'relative';
     character.style.width = '60px';
     character.style.height = '120px';
+    
+    // Set up the game area with a data center background
+    setupDataCenterBackground();
     
     // Head
     const head = document.createElement('div');
@@ -437,6 +471,8 @@ function increaseDifficulty() {
 
 // End the game
 function endGame() {
+    console.log("Game over. Final score:", gameState.score);
+    
     // Stop the game
     gameState.isPlaying = false;
     
@@ -444,8 +480,15 @@ function endGame() {
     const gameScreen = document.getElementById('game-screen');
     const gameOverScreen = document.getElementById('game-over');
     
-    if (gameScreen) gameScreen.classList.add('hidden');
-    if (gameOverScreen) gameOverScreen.classList.remove('hidden');
+    if (gameScreen) {
+        gameScreen.classList.add('hidden');
+        gameScreen.style.display = 'none';
+    }
+    
+    if (gameOverScreen) {
+        gameOverScreen.classList.remove('hidden');
+        gameOverScreen.style.display = 'flex';
+    }
     
     // Update final score and stats
     const finalScore = document.getElementById('final-score');
@@ -459,11 +502,27 @@ function endGame() {
     // Set up play again button
     const playAgainButton = document.getElementById('play-again');
     if (playAgainButton) {
-        playAgainButton.onclick = function() {
+        // Remove any existing event listeners by cloning the button
+        const newButton = playAgainButton.cloneNode(true);
+        if (playAgainButton.parentNode) {
+            playAgainButton.parentNode.replaceChild(newButton, playAgainButton);
+        }
+        
+        // Add new click handler
+        newButton.onclick = function() {
+            console.log("Play again clicked");
             // Go back to start screen
-            if (gameOverScreen) gameOverScreen.classList.add('hidden');
+            if (gameOverScreen) {
+                gameOverScreen.classList.add('hidden');
+                gameOverScreen.style.display = 'none';
+            }
+            
             const startScreen = document.getElementById('start-screen');
-            if (startScreen) startScreen.classList.remove('hidden');
+            if (startScreen) {
+                startScreen.classList.remove('hidden');
+                startScreen.style.display = 'flex';
+            }
+            
             resetGame();
         };
     }
@@ -559,8 +618,10 @@ function initializeAudio() {
     };
 }
 
-// Add CSS animations
-document.addEventListener('DOMContentLoaded', function() {
+// Add game animations
+function addGameAnimations() {
+    console.log("Adding game animations...");
+    
     const style = document.createElement('style');
     style.id = 'game-animations';
     style.textContent = `
@@ -581,12 +642,21 @@ document.addEventListener('DOMContentLoaded', function() {
             left: 50%;
             transform: translateX(-50%);
             animation: character-bounce 2s infinite ease-in-out;
+            z-index: 100;
         }
         
         @keyframes character-bounce {
             0%, 100% { transform: translateX(-50%) translateY(0); }
             50% { transform: translateX(-50%) translateY(-5px); }
         }
+        
+        .bad-report {
+            animation: report-pulse 0.8s infinite alternate;
+        }
+        
+        .good-report {
+            animation: report-float 3s infinite ease-in-out;
+        }
     `;
     document.head.appendChild(style);
-});
+}
