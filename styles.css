@@ -544,16 +544,29 @@ button {
     background-color: #55aa55;
     color: white;
     border: none;
-    padding: 12px 30px;
+    padding: 15px 30px;
     font-size: 1.2em;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
     font-family: 'Minecraft', monospace;
     box-shadow: inset -2px -4px #3a783a, inset 2px 2px #78cc78;
     image-rendering: pixelated;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+    
+    /* Make buttons bigger and more tappable on mobile */
+    @media (max-width: 480px) {
+        padding: 18px 35px;
+        font-size: 1.3em;
+        margin: 15px 0;
+    }
 }
 
-button:hover {
+button:hover, button:active {
     background-color: #78cc78;
 }
 
@@ -562,6 +575,59 @@ button:disabled {
     box-shadow: inset -2px -4px #333333, inset 2px 2px #777777;
     cursor: not-allowed;
     opacity: 0.7;
+}
+
+/* Specific style for start game button to ensure visibility and tappability */
+#start-game {
+    display: block;
+    width: 80%;
+    max-width: 300px;
+    margin: 20px auto;
+    padding: 15px 0;
+    font-size: 1.3em;
+}
+
+/* Make play again button more tappable */
+#play-again {
+    display: block;
+    width: 80%;
+    max-width: 250px;
+    margin: 20px auto;
+}
+
+/* Mobile specific button styles */
+@media (max-width: 480px) {
+    #start-game, #play-again {
+        padding: 20px 0;
+        font-size: 1.5em;
+        margin-top: 25px;
+        margin-bottom: 25px;
+        box-shadow: none; /* Simplify button appearance on mobile */
+        border: 2px solid #3a783a; /* Add border instead */
+        border-radius: 8px; /* Rounded corners for better mobile look */
+    }
+    
+    /* Make the whole character element more tappable by increasing its size */
+    .character {
+        min-height: 120px;
+        touch-action: manipulation;
+    }
+    
+    /* Increase the hit area of active buttons */
+    button:not([disabled]) {
+        position: relative;
+    }
+    
+    /* Create a larger hit area with pseudo-element */
+    button:not([disabled])::after {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        z-index: -1;
+    }
 }
 
 #hud {

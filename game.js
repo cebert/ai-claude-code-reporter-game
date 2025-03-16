@@ -38,9 +38,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Auto-select first character after a short delay to help with testing
     setTimeout(() => {
-        const firstCharacter = document.querySelector('.character');
-        if (firstCharacter && !gameState.character) {
-            firstCharacter.click();
+        if (!gameState.character) {
+            const characters = document.querySelectorAll('.character');
+            if (characters.length > 0) {
+                // Manually trigger selection on first character
+                // Remove selected class from all characters
+                characters.forEach(c => c.classList.remove('selected'));
+                
+                // Add selected class to first character
+                characters[0].classList.add('selected');
+                
+                // Store selected character
+                gameState.character = characters[0].dataset.name;
+                console.log("Auto-selected character:", gameState.character);
+                
+                // Enable start button
+                const startButton = document.getElementById('start-game');
+                if (startButton) {
+                    startButton.disabled = false;
+                    startButton.style.cursor = 'pointer';
+                    startButton.style.opacity = '1';
+                }
+                
+                // Play select sound if available
+                if (window.playSound) {
+                    window.playSound('select');
+                }
+            }
         }
     }, 1000);
 });
@@ -56,9 +80,16 @@ function setupCharacterSelection() {
         startButton.style.cursor = 'not-allowed';
     }
     
-    // Add click listeners to each character
+    // Add click and touch listeners to each character
     characters.forEach(character => {
-        character.addEventListener('click', function() {
+        // Function to handle character selection
+        const handleCharacterSelect = function(e) {
+            // Prevent default touch behavior and propagation
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
             // Play select sound if available
             if (window.playSound) {
                 window.playSound('select');
@@ -80,22 +111,80 @@ function setupCharacterSelection() {
                 startButton.style.cursor = 'pointer';
                 startButton.style.opacity = '1';
             }
+        };
+        
+        // Remove any existing event listeners
+        const newCharacter = character.cloneNode(true);
+        character.parentNode.replaceChild(newCharacter, character);
+        
+        // Add both click and touch handlers
+        newCharacter.addEventListener('click', handleCharacterSelect);
+        newCharacter.addEventListener('touchend', handleCharacterSelect);
+        
+        // Add visual feedback on touch
+        newCharacter.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.opacity = '0.8';
+        });
+        
+        // Reset visual state on touch cancel
+        newCharacter.addEventListener('touchcancel', function() {
+            this.style.opacity = '1';
         });
     });
     
-    // Set up start button click handler
+    // Set up start button click and touch handlers
     if (startButton) {
-        startButton.onclick = function() {
-            if (gameState.character) {
+        // Clear any existing handlers
+        startButton.onclick = null;
+        startButton.ontouchend = null;
+        
+        // Function to handle start button activation
+        const handleStartGame = function(e) {
+            // Prevent default touch behavior
+            if (e) {
+                e.preventDefault();
+            }
+            
+            if (gameState.character && !startButton.disabled) {
+                // Visual feedback
+                startButton.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    startButton.style.transform = '';
+                }, 100);
+                
                 // Play select sound if available
                 if (window.playSound) {
                     window.playSound('select');
                 }
                 
                 console.log("Starting game with character:", gameState.character);
-                startGame();
+                
+                // Small delay to ensure visual feedback is seen
+                setTimeout(() => {
+                    startGame();
+                }, 150);
             }
         };
+        
+        // Add both click and touch handlers
+        startButton.addEventListener('click', handleStartGame);
+        startButton.addEventListener('touchend', handleStartGame);
+        
+        // Also handle touchstart to provide feedback
+        startButton.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Prevent double tap zoom
+            if (!startButton.disabled) {
+                startButton.style.opacity = '0.8';
+            }
+        });
+        
+        // Reset visual state on touch cancel
+        startButton.addEventListener('touchcancel', function() {
+            startButton.style.opacity = startButton.disabled ? '0.7' : '1';
+            startButton.style.transform = '';
+        });
     }
 }
 
@@ -701,7 +790,7 @@ function spawnReport() {
             }
         }, 2000 + Math.random() * 1000);
     } else {
-        // For bad reports, add click/touch handlers
+        // For bad reports, add click/touch handlers for better mobile response
         const handleReportFix = function() {
             // Skip if already handled
             if (report.classList.contains('fixed')) return;
@@ -757,18 +846,11 @@ function spawnReport() {
             }, 500);
         };
         
-        // Add both click and touch handlers for better mobile response
+        // Add both click and touch handlers
         report.addEventListener('click', handleReportFix);
         report.addEventListener('touchend', function(e) {
             e.preventDefault(); // Prevent double events on mobile
             handleReportFix();
-        });
-                setTimeout(() => {
-                    if (this.parentNode) {
-                        gameArea.removeChild(this);
-                    }
-                }, 1500);
-            }, 500);
         });
         
         // Add expiration for bad reports - they disappear if not fixed
@@ -785,7 +867,7 @@ function spawnReport() {
                     }
                 }, 500);
             }
-        }, 5000);
+        }, 5000); // 5 seconds to fix reports
     }
 }
 
@@ -865,7 +947,7 @@ function endGame() {
     if (reportsFixed) reportsFixed.textContent = gameState.fixedReports;
     if (levelsCompleted) levelsCompleted.textContent = gameState.level;
     
-    // Set up play again button
+    // Set up play again button with touch support
     const playAgainButton = document.getElementById('play-again');
     if (playAgainButton) {
         // Remove any existing event listeners by cloning the button
@@ -874,23 +956,54 @@ function endGame() {
             playAgainButton.parentNode.replaceChild(newButton, playAgainButton);
         }
         
-        // Add new click handler
-        newButton.onclick = function() {
-            console.log("Play again clicked");
-            // Go back to start screen
-            if (gameOverScreen) {
-                gameOverScreen.classList.add('hidden');
-                gameOverScreen.style.display = 'none';
+        // Function to handle play again
+        const handlePlayAgain = function(e) {
+            // Prevent default touch behavior
+            if (e) {
+                e.preventDefault();
             }
             
-            const startScreen = document.getElementById('start-screen');
-            if (startScreen) {
-                startScreen.classList.remove('hidden');
-                startScreen.style.display = 'flex';
-            }
+            // Visual feedback
+            newButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                newButton.style.transform = '';
+            }, 100);
             
-            resetGame();
+            console.log("Play again clicked/tapped");
+            
+            // Small delay to ensure visual feedback is seen
+            setTimeout(() => {
+                // Go back to start screen
+                if (gameOverScreen) {
+                    gameOverScreen.classList.add('hidden');
+                    gameOverScreen.style.display = 'none';
+                }
+                
+                const startScreen = document.getElementById('start-screen');
+                if (startScreen) {
+                    startScreen.classList.remove('hidden');
+                    startScreen.style.display = 'flex';
+                }
+                
+                resetGame();
+            }, 150);
         };
+        
+        // Add both click and touch handlers
+        newButton.addEventListener('click', handlePlayAgain);
+        newButton.addEventListener('touchend', handlePlayAgain);
+        
+        // Also handle touchstart to provide feedback
+        newButton.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Prevent double tap zoom
+            newButton.style.opacity = '0.8';
+        });
+        
+        // Reset visual state on touch cancel
+        newButton.addEventListener('touchcancel', function() {
+            newButton.style.opacity = '1';
+            newButton.style.transform = '';
+        });
     }
 }
 
@@ -1022,6 +1135,11 @@ function addGameAnimations() {
         
         .good-report {
             animation: report-float 3s infinite ease-in-out;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
         }
     `;
     document.head.appendChild(style);
