@@ -1,0 +1,2328 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Use a fallback font instead of the custom Minecraft font */
+@font-face {
+    font-family: 'Minecraft';
+    src: url('https://dl.dafont.com/dl/?f=minecraft') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Minecraft', 'Courier New', monospace;
+    background-color: #333333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+/* Loading screen */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #222222;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+}
+
+.loading-block {
+    width: 80px;
+    height: 80px;
+    background-color: #55aa55;
+    position: relative;
+    animation: minecraft-loading 1.5s infinite;
+    image-rendering: pixelated;
+    box-shadow: inset 5px 5px rgba(255,255,255,0.2), inset -5px -5px rgba(0,0,0,0.2);
+}
+
+.loading-text {
+    margin-top: 20px;
+    font-size: 24px;
+    color: #55aa55;
+    text-shadow: 2px 2px 0 #222;
+    font-family: 'Minecraft', monospace;
+}
+
+@keyframes minecraft-loading {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(90deg) scale(0.9); }
+    50% { transform: rotate(180deg) scale(1); }
+    75% { transform: rotate(270deg) scale(0.9); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100%;
+    max-height: 100%;
+    background-color: #222222;
+    border: none; /* Removed border to allow full screen */
+    box-shadow: 0 0 20px rgba(85, 170, 85, 0.4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    transition: opacity 0.5s ease;
+}
+
+#game-screen {
+    background-color: #1c2733;
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align to top */
+    align-items: stretch; /* Fill width */
+}
+
+#hud {
+    display: flex;
+    justify-content: space-around;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.7);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#game-area {
+    position: absolute;
+    top: 60px; /* Leave space for HUD */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 60px);
+    overflow: hidden;
+    background-color: #1a1f35;
+}
+
+
+.hidden {
+    display: none;
+}
+
+h1 {
+    font-size: 3em;
+    color: #55aa55;
+    margin-bottom: 10px;
+    font-family: 'Minecraft', monospace;
+    text-shadow: 2px 2px 0 #222;
+}
+
+h2 {
+    font-size: 1.5em;
+    color: #aaaaaa;
+    margin-bottom: 30px;
+    font-family: 'Minecraft', monospace;
+}
+
+#character-selection {
+    text-align: center;
+    width: 100%;
+}
+
+.character-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+#start-game {
+    background-color: #55aa55;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-family: 'Minecraft', monospace;
+    font-size: 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #458545;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+#start-game:hover:not([disabled]) {
+    background-color: #66bb66;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #458545;
+}
+
+#start-game:active:not([disabled]) {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #458545;
+}
+
+#start-game[disabled] {
+    background-color: #888888;
+    cursor: not-allowed;
+    box-shadow: 0 4px 0 #666666;
+    opacity: 0.7;
+}
+
+.character {
+    cursor: pointer;
+    width: 120px;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.character:hover, .character.selected {
+    background-color: rgba(85, 170, 85, 0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(85, 170, 85, 0.4);
+}
+
+/* Character animation */
+.character {
+    transition: all 0.3s ease;
+}
+
+.minecraft-character .character-avatar {
+    animation: character-bounce 2s infinite ease-in-out;
+}
+
+@keyframes character-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.character.selected {
+    border: 2px solid #55aa55;
+    box-shadow: 0 0 10px #55aa55;
+}
+
+.character-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 10px;
+    position: relative;
+    overflow: hidden;
+    /* Minecraft style */
+    image-rendering: pixelated;
+}
+
+/* Minecraft character styles for selection screen */
+.minecraft-character .character-avatar {
+    position: relative;
+    width: 60px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+.minecraft-character .mc-head {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    background-color: #f5d5a0;
+    box-shadow: inset 2px 2px rgba(255,255,255,0.3), inset -2px -2px rgba(0,0,0,0.3);
+}
+
+.minecraft-character .mc-body {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 25px;
+    background-color: #5d4037;
+    box-shadow: inset 2px 2px rgba(255,255,255,0.2), inset -2px -2px rgba(0,0,0,0.3);
+}
+
+.minecraft-character .mc-legs {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 25px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.minecraft-character .mc-legs:before,
+.minecraft-character .mc-legs:after {
+    content: '';
+    width: 8px;
+    height: 100%;
+    background-color: #2c2c2c;
+    box-shadow: inset 1px 1px rgba(255,255,255,0.2), inset -1px -1px rgba(0,0,0,0.3);
+}
+
+.minecraft-character .mc-arms {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 25px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.minecraft-character .mc-arms:before,
+.minecraft-character .mc-arms:after {
+    content: '';
+    width: 8px;
+    height: 100%;
+    background-color: #5d4037;
+    box-shadow: inset 1px 1px rgba(255,255,255,0.2), inset -1px -1px rgba(0,0,0,0.3);
+}
+
+/* Minecraft head face details */
+.minecraft-character .mc-head:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-image: 
+        /* Eyes */
+        linear-gradient(to right, transparent 25%, #000 25%, #000 40%, transparent 40%, transparent 60%, #000 60%, #000 75%, transparent 75%),
+        /* Mouth */
+        linear-gradient(to right, transparent 35%, #000 35%, #000 65%, transparent 65%);
+    background-position: 0 40%, 0 70%;
+    background-size: 100% 15%, 100% 10%;
+    background-repeat: no-repeat;
+}
+
+/* Ensure faces are pixelated */
+.minecraft-character {
+    image-rendering: pixelated;
+}
+
+/* Add animations for hovering */
+.minecraft-character:hover .mc-head,
+.minecraft-character:hover .mc-body,
+.minecraft-character:hover .mc-legs:before,
+.minecraft-character:hover .mc-legs:after,
+.minecraft-character:hover .mc-arms:before,
+.minecraft-character:hover .mc-arms:after {
+    animation: mc-hover 0.5s infinite alternate;
+}
+
+@keyframes mc-hover {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-2px); }
+}
+
+/* Selected character glow */
+.character.selected .character-avatar {
+    animation: selected-glow 1.5s infinite alternate;
+}
+
+@keyframes selected-glow {
+    0% { box-shadow: 0 0 5px #55aa55; }
+    100% { box-shadow: 0 0 20px #55aa55; }
+}
+
+.character-michael {
+    background-image: linear-gradient(to bottom, #e9c9a0 0%, #e9c9a0 20%, #c5a98d 20%, #c5a98d 22%, #e9c9a0 22%, #e9c9a0 80%, #e74c3c 80%, #e74c3c 100%);
+}
+
+.character-michael::after {
+    content: "";
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 55%;
+    height: 20%;
+    background-color: #e9c9a0;
+    border-radius: 50%;
+    box-shadow: 
+        0 -8px 0 0px #999, /* gray hair */
+        0 2px 0 0 #c5a98d, /* nose shadow */
+        -8px 0 0 0 rgba(0,0,0,0.1), /* face shadow */
+        -10px 4px 0 -6px #000, /* eye */
+        10px 4px 0 -6px #000, /* eye */
+        0 12px 0 -2px rgba(0,0,0,0.3), /* glasses */
+        -10px 4px 0 -3px rgba(0,0,0,0.2), /* glasses */
+        10px 4px 0 -3px rgba(0,0,0,0.2); /* glasses */
+}
+
+.character-chris {
+    background-image: linear-gradient(to bottom, #f5e0c1 0%, #f5e0c1 20%, #dbc3a6 20%, #dbc3a6 22%, #f5e0c1 22%, #f5e0c1 80%, #2c3e50 80%, #2c3e50 100%);
+}
+
+.character-chris::after {
+    content: "";
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 55%;
+    height: 20%;
+    background-color: #f5e0c1;
+    border-radius: 50%;
+    box-shadow: 
+        0 -6px 0 0px #333, /* hair */
+        0 2px 0 0 #dbc3a6, /* nose shadow */
+        -8px 0 0 0 rgba(0,0,0,0.1), /* face shadow */
+        -10px 4px 0 -6px #000, /* eye */
+        10px 4px 0 -6px #000; /* eye */
+}
+
+.character-rodolfo {
+    background-image: linear-gradient(to bottom, #cfaa81 0%, #cfaa81 20%, #b58e67 20%, #b58e67 22%, #cfaa81 22%, #cfaa81 80%, #f39c12 80%, #f39c12 100%);
+}
+
+.character-rodolfo::after {
+    content: "";
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 20%;
+    background-color: #cfaa81;
+    border-radius: 50%;
+    box-shadow: 
+        0 -8px 0 0px #222, /* hair */
+        0 2px 0 0 #b58e67, /* nose shadow */
+        -8px 0 0 0 rgba(0,0,0,0.1), /* face shadow */
+        -10px 4px 0 -6px #000, /* eye */
+        10px 4px 0 -6px #000, /* eye */
+        0 15px 0 -2px #000; /* beard */
+}
+
+.character-desc {
+    font-size: 0.9em;
+    color: #aaaaaa;
+    margin-top: 5px;
+}
+
+button {
+    background-color: #55aa55;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: 'Minecraft', monospace;
+    box-shadow: inset -2px -4px #3a783a, inset 2px 2px #78cc78;
+    image-rendering: pixelated;
+}
+
+button:hover {
+    background-color: #78cc78;
+}
+
+button:disabled {
+    background-color: #555555;
+    box-shadow: inset -2px -4px #333333, inset 2px 2px #777777;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+#hud {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background-color: #232f3e; /* AWS blue */
+    color: white;
+    font-size: 1.3em;
+    border-bottom: 2px solid #ff9900; /* AWS orange */
+    position: relative;
+    z-index: 10;
+}
+
+#score {
+    font-weight: bold;
+    color: #ff9900; /* AWS orange */
+    text-shadow: 0 0 5px rgba(255, 153, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 5px 12px;
+    border-radius: 20px;
+    transition: transform 0.2s;
+}
+
+#score.scored {
+    animation: pulse-score 0.5s;
+}
+
+#score.penalized {
+    animation: pulse-penalize 0.5s;
+    color: #ff5555;
+}
+
+@keyframes pulse-penalize {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: #ff5555; }
+    100% { transform: scale(1); }
+}
+
+.report-screen.mistake {
+    animation: mistake-shake 0.5s;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+}
+
+@keyframes mistake-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+@keyframes pulse-score {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+#timer {
+    font-weight: bold;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+#timer::before {
+    content: '⏱️';
+    margin-right: 5px;
+}
+
+#tools-container {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+    z-index: 10;
+    position: relative;
+}
+
+.tool {
+    padding: 10px 15px;
+    margin: 0 10px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    user-select: none;
+    touch-action: manipulation;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.tool::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    background-color: rgba(255, 153, 0, 0.1); /* AWS orange with opacity */
+    transition: height 10s linear;
+    z-index: -1;
+}
+
+.tool:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-color: #ddd;
+}
+
+.tool.active {
+    background-color: #232f3e; /* AWS blue */
+    color: white;
+    border-color: #ff9900; /* AWS orange */
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 153, 0, 0.3);
+}
+
+.tool.active::before {
+    height: 100%;
+    background-color: rgba(255, 153, 0, 0.3);
+}
+
+.tool.cooldown {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: #f2f2f2;
+    color: #999;
+    box-shadow: none;
+    transform: none;
+}
+
+.tool.cooldown::after {
+    content: 'Recharging...';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.tool-icon {
+    font-size: 2em;
+    margin-bottom: 8px;
+    transition: transform 0.3s;
+}
+
+.tool:hover .tool-icon {
+    transform: scale(1.2);
+}
+
+.tool.active .tool-icon {
+    animation: tool-pulse 1s infinite alternate;
+}
+
+@keyframes tool-pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.3); }
+}
+
+.tool-name {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #333;
+}
+
+.tool.active .tool-name {
+    color: white;
+}
+
+#game-area {
+    height: calc(100% - 100px); /* Adjusted for tools */
+    position: relative;
+    overflow: hidden;
+    background-color: #f5f7fa;
+    padding-top: 60px; /* Space for AWS cloud */
+}
+
+/* Data Center background */
+#office-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        /* Data center wall pattern with more depth */
+        linear-gradient(to bottom, #1a1f35 0%, #232f3e 35%, #2a394d 65%, #1c1c1c 65%, #1c1c1c 100%),
+        /* Server floor pattern with grid for data center look */
+        linear-gradient(90deg, rgba(70,100,150,0.3) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(70,100,150,0.3) 1px, transparent 1px);
+    background-position: 0 0, 0 65%, 0 65%;
+    background-size: 100% 100%, 20px 20px, 20px 20px;
+    z-index: 0;
+    overflow: hidden;
+}
+
+/* Add server racks to background - more prominent */
+#office-background::before {
+    content: "";
+    position: absolute;
+    top: 20%; /* Higher up in the background */
+    left: 0;
+    width: 100%;
+    height: 45%; /* Taller server racks */
+    background-image: 
+        /* Server rack patterns with more detail */
+        repeating-linear-gradient(to right, 
+            #232a38 0px, #232a38 40px, 
+            #1c232e 40px, #1c232e 80px,
+            #252f40 80px, #252f40 120px,
+            #1a2334 120px, #1a2334 160px
+        );
+    box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+    z-index: -1;
+}
+
+/* Add server lights - more of them and brighter */
+#office-background::after {
+    content: "";
+    position: absolute;
+    top: 25%; /* Positioned to match server racks */
+    left: 0;
+    width: 100%;
+    height: 35%; /* Cover more of the rack area */
+    background-image: 
+        /* Server lights - more colors and density */
+        radial-gradient(circle at 20px 10px, rgba(85, 255, 85, 0.8) 0px, rgba(85, 255, 85, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 20px 40px, rgba(85, 255, 85, 0.8) 0px, rgba(85, 255, 85, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 60px 10px, rgba(255, 170, 0, 0.8) 0px, rgba(255, 170, 0, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 60px 40px, rgba(255, 170, 0, 0.8) 0px, rgba(255, 170, 0, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 100px 10px, rgba(255, 85, 85, 0.8) 0px, rgba(255, 85, 85, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 100px 40px, rgba(255, 85, 85, 0.8) 0px, rgba(255, 85, 85, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 140px 10px, rgba(85, 255, 255, 0.8) 0px, rgba(85, 255, 255, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 140px 40px, rgba(85, 255, 255, 0.8) 0px, rgba(85, 255, 255, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 180px 10px, rgba(255, 170, 0, 0.8) 0px, rgba(255, 170, 0, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 180px 40px, rgba(255, 170, 0, 0.8) 0px, rgba(255, 170, 0, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 220px 10px, rgba(255, 85, 85, 0.8) 0px, rgba(255, 85, 85, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 220px 40px, rgba(255, 85, 85, 0.8) 0px, rgba(255, 85, 85, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 260px 10px, rgba(85, 255, 85, 0.8) 0px, rgba(85, 255, 85, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 260px 40px, rgba(85, 255, 85, 0.8) 0px, rgba(85, 255, 85, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 300px 10px, rgba(85, 170, 255, 0.8) 0px, rgba(85, 170, 255, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 300px 40px, rgba(85, 170, 255, 0.8) 0px, rgba(85, 170, 255, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 340px 10px, rgba(255, 85, 255, 0.8) 0px, rgba(255, 85, 255, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 340px 40px, rgba(255, 85, 255, 0.8) 0px, rgba(255, 85, 255, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 380px 10px, rgba(85, 255, 85, 0.8) 0px, rgba(85, 255, 85, 0.2) 3px, transparent 6px),
+        radial-gradient(circle at 380px 40px, rgba(85, 255, 85, 0.8) 0px, rgba(85, 255, 85, 0.2) 3px, transparent 6px);
+    background-size: 400px 70px;
+    background-repeat: repeat-x;
+    animation: server-lights 1.5s infinite alternate;
+    z-index: -1;
+}
+
+/* Add data center cables */
+#office-background::before {
+    content: "";
+    position: absolute;
+    top: 20%;
+    left: 0;
+    width: 100%;
+    height: 45%;
+    background-image: 
+        /* Server rack patterns */
+        repeating-linear-gradient(to right, 
+            #232a38 0px, #232a38 40px, 
+            #1c232e 40px, #1c232e 80px,
+            #252f40 80px, #252f40 120px,
+            #1a2334 120px, #1a2334 160px
+        ),
+        /* Network cable patterns */
+        linear-gradient(to bottom,
+            transparent 15px, rgba(255, 100, 100, 0.3) 15px, rgba(255, 100, 100, 0.3) 16px, transparent 16px,
+            transparent 35px, rgba(100, 255, 100, 0.3) 35px, rgba(100, 255, 100, 0.3) 36px, transparent 36px,
+            transparent 55px, rgba(100, 100, 255, 0.3) 55px, rgba(100, 100, 255, 0.3) 56px, transparent 56px
+        );
+    box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+    z-index: -1;
+}
+
+@keyframes server-lights {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Workstation layout */
+#workstation-area {
+    position: absolute;
+    width: 100%;
+    height: 70%;
+    top: 15%;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    z-index: 1;
+}
+
+.workstation {
+    position: relative;
+    width: 200px;
+    height: 180px;
+    margin: 10px;
+}
+
+.desk {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #444;
+    border: 2px solid #333;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    /* Server style details */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.desk::before {
+    content: '';
+    width: 90%;
+    height: 8px;
+    background-color: #222;
+    border: 1px solid #111;
+}
+
+.desk::after {
+    content: '';
+    width: 90%;
+    height: 8px;
+    background-color: #222;
+    border: 1px solid #111;
+}
+
+.computer {
+    position: absolute;
+    width: 160px;
+    height: 120px;
+    bottom: 60px;
+    left: 20px;
+}
+
+.monitor {
+    position: absolute;
+    width: 160px;
+    height: 100px;
+    background-color: #222;
+    border: 3px solid #444;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5), inset 0 0 5px rgba(85, 255, 85, 0.1);
+    overflow: hidden;
+    image-rendering: pixelated;
+}
+
+.monitor::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    background-color: #111;
+    border: 1px solid #333;
+}
+
+.keyboard {
+    position: absolute;
+    bottom: 0;
+    left: 30px;
+    width: 100px;
+    height: 15px;
+    background-color: #333;
+    border: 1px solid #444;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* Report on screens */
+.report-screen {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    background-color: #1e4a76;
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: 'Minecraft', 'Courier New', monospace;
+    font-size: 10px;
+    padding: 5px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    image-rendering: pixelated;
+    box-shadow: inset 2px 2px rgba(255,255,255,0.2), inset -2px -2px rgba(0,0,0,0.3);
+}
+
+.report-screen.error {
+    background-color: #aa0000; /* Bad report - red */
+    animation: error-flash 0.5s infinite alternate;
+}
+
+.report-screen.warning {
+    background-color: #ffaa00; /* Medium report - orange/yellow */
+    animation: warning-flash 1s infinite alternate;
+}
+
+.report-screen.info {
+    background-color: #55aa55; /* Good report - green */
+    animation: info-flash 2s infinite alternate;
+}
+
+@keyframes error-flash {
+    0% { filter: brightness(1); box-shadow: 0 0 5px rgba(255, 0, 0, 0.7); }
+    100% { filter: brightness(1.5); box-shadow: 0 0 15px rgba(255, 0, 0, 0.9); }
+}
+
+@keyframes warning-flash {
+    0% { filter: brightness(1); box-shadow: 0 0 5px rgba(255, 170, 0, 0.7); }
+    100% { filter: brightness(1.3); box-shadow: 0 0 12px rgba(255, 170, 0, 0.9); }
+}
+
+@keyframes info-flash {
+    0% { filter: brightness(1); box-shadow: 0 0 5px rgba(85, 170, 85, 0.7); }
+    100% { filter: brightness(1.2); box-shadow: 0 0 10px rgba(85, 170, 85, 0.9); }
+}
+
+.report-screen-icon {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.report-screen-text {
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    font-size: 8px;
+}
+
+.report-screen-service {
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.fix-button {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+    padding: 2px 5px;
+    margin-top: 5px;
+    font-size: 8px;
+    font-family: 'Arial', sans-serif;
+    color: white;
+}
+
+.report-screen.progress .fix-button {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Flying report animation */
+.flying-report {
+    transition: all 0.5s ease;
+    animation: fly-to-cloud 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes fly-to-cloud {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(0, -250px) scale(0.7) rotate(-5deg);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(0, -300px) scale(0.5) rotate(0);
+        opacity: 0;
+    }
+}
+
+/* Points animation */
+@keyframes points-up {
+    0% {
+        transform: translateY(0) translateX(-50%);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50px) translateX(-50%);
+        opacity: 0;
+    }
+}
+
+/* Level up animation */
+@keyframes level-up-anim {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Tool effect animation */
+@keyframes tool-effect-anim {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+    10% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    90% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* Pulse animation for elements that need attention */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Cloud floating animation */
+@keyframes cloud-float {
+    0% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-8px); }
+    100% { transform: translateX(-50%) translateY(0); }
+}
+
+/* Cloud receive animation */
+.cloud-receive {
+    animation: cloud-receive 1s ease-out !important;
+}
+
+@keyframes cloud-receive {
+    0% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 30px rgba(255, 153, 0, 0.8) !important; }
+    100% { transform: translateX(-50%) scale(1); }
+}
+
+/* Report animations */
+@keyframes report-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
+    100% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
+}
+
+@keyframes report-float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0); }
+}
+
+/* Mistake indication */
+.report.mistake {
+    animation: mistake-shake 0.5s !important;
+}
+
+@keyframes mistake-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+/* Message animation */
+@keyframes message-anim {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+/* Blinking server lights */
+@keyframes blink-light {
+    0%, 90% { opacity: 1; }
+    91%, 100% { opacity: 0.3; }
+}
+
+/* Fix progress bar */
+.fix-progress {
+    height: 5px;
+    background-color: #2ecc71;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transition: width 0.1s linear;
+}
+
+/* Styling for the report fixing state */
+.report-screen.fixing {
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.8);
+    animation: fixing-pulse 1s infinite alternate !important;
+}
+
+@keyframes fixing-pulse {
+    0% { box-shadow: 0 0 10px rgba(46, 204, 113, 0.6); }
+    100% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.9); }
+}
+
+/* Game over screen styling */
+#detailed-stats {
+    max-width: 400px;
+    margin: 15px auto;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+#detailed-stats h3 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#detailed-stats p {
+    margin: 5px 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .character-grid {
+        gap: 10px;
+    }
+    
+    .character {
+        width: 100px;
+    }
+    
+    .workstation {
+        width: 160px;
+        height: 140px;
+    }
+    
+    .monitor {
+        width: 140px;
+        height: 80px;
+    }
+    
+    #tools-container {
+        flex-wrap: wrap;
+    }
+    
+    .tool {
+        flex: 1 0 30%;
+        margin: 5px;
+        padding: 8px;
+    }
+    
+    .tool-icon {
+        font-size: 1.5em;
+    }
+    
+    .tool-name {
+        font-size: 0.8em;
+    }
+    
+    #aws-cloud {
+        width: 70% !important;
+        font-size: 16px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2em;
+    }
+    
+    h2 {
+        font-size: 1.2em;
+    }
+    
+    .character {
+        width: 80px;
+    }
+    
+    .character-name {
+        font-size: 0.9em;
+    }
+    
+    .character-desc {
+        font-size: 0.8em;
+    }
+    
+    #hud {
+        font-size: 1em;
+        padding: 8px 12px;
+    }
+    
+    .workstation {
+        width: 120px;
+        height: 110px;
+    }
+    
+    .monitor {
+        width: 100px;
+        height: 60px;
+    }
+    
+    .tool {
+        padding: 5px;
+    }
+    
+    .tool-icon {
+        font-size: 1.3em;
+        margin-bottom: 4px;
+    }
+    
+    .tool-name {
+        font-size: 0.7em;
+    }
+}
+
+/* Office decorations */
+.office-items {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.server-light {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #55ff55;
+    bottom: 30%;
+    box-shadow: 0 0 10px #55ff55;
+    animation: blink-light 3s infinite alternate;
+}
+
+.left-light {
+    left: 5%;
+}
+
+.right-light {
+    right: 5%;
+    animation-delay: 1.5s;
+}
+
+@keyframes blink-light {
+    0%, 80% { opacity: 1; }
+    90% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.data-screen {
+    position: absolute;
+    top: 10%;
+    right: 5%;
+    width: 200px;
+    height: 80px;
+    background-color: #222;
+    border: 4px solid #444;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(85, 255, 85, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.data-text {
+    font-family: 'Minecraft', monospace;
+    color: #55ff55;
+    font-size: 0.9em;
+    text-align: center;
+    text-shadow: 0 0 5px #55ff55;
+    animation: data-scroll 10s linear infinite;
+    white-space: nowrap;
+}
+
+@keyframes data-scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+/* Player character */
+#player-character {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 150px;
+    z-index: 10;
+}
+
+/* Character styles - Minecraft inspired */
+.character-sprite {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    image-rendering: pixelated;
+}
+
+/* Minecraft-style cube head */
+.character-sprite .head {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: #f5d5a0; /* Default skin color */
+    z-index: 2;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2);
+    /* Pixelated effect */
+    image-rendering: pixelated;
+}
+
+/* Minecraft-style body */
+.character-sprite .body {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 45px;
+    z-index: 1;
+    background-color: #5d4037; /* Default shirt color */
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2);
+    /* Pixelated effect */
+    image-rendering: pixelated;
+}
+
+/* Minecraft-style legs */
+.character-sprite .legs {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 45px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.character-sprite .leg {
+    width: 12px;
+    height: 100%;
+    background-color: #5d4037; /* Dark brown pants */
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2);
+    /* Pixelated effect */
+    image-rendering: pixelated;
+}
+
+/* Minecraft-style arms */
+.character-sprite .arms {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 45px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 0;
+}
+
+.character-sprite .arm {
+    width: 12px;
+    height: 100%;
+    background-color: #5d4037; /* Matches shirt color */
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2);
+    /* Pixelated effect */
+    image-rendering: pixelated;
+}
+
+/* Minecraft-style animation */
+.character-sprite {
+    animation: minecraft-idle 1.5s infinite;
+}
+
+@keyframes minecraft-idle {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(1px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Character: Chris - Minecraft style */
+.character-chris .head {
+    background-color: #f5e0c1;
+    /* Minecraft face */
+    background-image: 
+        /* Eyes */
+        linear-gradient(to right, transparent 30%, #000 30%, #000 38%, transparent 38%, transparent 62%, #000 62%, #000 70%, transparent 70%),
+        /* Mouth */
+        linear-gradient(to right, transparent 40%, #000 40%, #000 60%, transparent 60%);
+    background-position: 50% 45%, 50% 70%;
+    background-size: 80% 15%, 60% 10%;
+    background-repeat: no-repeat;
+}
+
+.character-chris .head::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background-color: #222; /* Short black hair */
+}
+
+.character-chris .body {
+    background-color: #232f3e; /* AWS blue */
+}
+
+.character-chris .body::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+    height: 15px;
+    background-image: 
+        linear-gradient(to right, transparent 20%, #ff9900 20%, #ff9900 32%, transparent 32%,
+                        transparent 38%, #ff9900 38%, #ff9900 62%, transparent 62%,
+                        transparent 68%, #ff9900 68%, #ff9900 80%, transparent 80%);
+    background-repeat: no-repeat;
+}
+
+/* Character: Michael - Minecraft style */
+.character-michael .head {
+    background-color: #e9c9a0;
+    /* Minecraft face with glasses */
+    background-image: 
+        /* Glasses */
+        linear-gradient(to right, transparent 20%, #333 20%, #333 42%, transparent 42%, transparent 58%, #333 58%, #333 80%, transparent 80%),
+        linear-gradient(to right, transparent 28%, #333 28%, #333 38%, #33d 38%, #33d 42%, #333 42%, #333 58%, #33d 58%, #33d 62%, #333 62%, #333 72%, transparent 72%),
+        /* Mouth */
+        linear-gradient(to right, transparent 40%, #000 40%, #000 60%, transparent 60%);
+    background-position: 50% 40%, 50% 40%, 50% 75%;
+    background-size: 100% 5%, 100% 14%, 60% 10%;
+    background-repeat: no-repeat;
+}
+
+.character-michael .head::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background-color: #aaa; /* Gray hair */
+}
+
+.character-michael .body {
+    background-color: #e74c3c; /* Reddish for lobster shirt */
+    background-image: 
+        linear-gradient(to right, transparent 40%, #fff 40%, #fff 60%, transparent 60%);
+    background-position: 50% 50%;
+    background-size: 100% 10%;
+    background-repeat: no-repeat;
+}
+
+/* Character: Zach - white male with glasses - RMS pro */
+.character-zach .head {
+    background-color: #f8dcbb;
+    /* Minecraft face with glasses */
+    background-image: 
+        /* Glasses */
+        linear-gradient(to right, transparent 25%, #333 25%, #333 42%, transparent 42%, transparent 58%, #333 58%, #333 75%, transparent 75%),
+        linear-gradient(to right, transparent 28%, #333 28%, #333 38%, #33d 38%, #33d 42%, #333 42%, #333 58%, #33d 58%, #33d 62%, #333 62%, #333 72%, transparent 72%),
+        /* Mouth */
+        linear-gradient(to right, transparent 40%, #000 40%, #000 60%, transparent 60%);
+    background-position: 50% 40%, 50% 40%, 50% 70%;
+    background-size: 100% 5%, 100% 14%, 60% 5%;
+    background-repeat: no-repeat;
+}
+
+.character-zach .head::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background-color: #8a6a4a; /* Short hair */
+}
+
+.character-zach .body {
+    background-color: #3498db; /* Blue */
+    background-image: 
+        linear-gradient(to right, transparent 30%, #fff 30%, #fff 38%, transparent 38%, 
+                        transparent 40%, #fff 40%, #fff 60%, transparent 60%,
+                        transparent 62%, #fff 62%, #fff 70%, transparent 70%);
+    background-position: 50% 50%;
+    background-size: 100% 20%;
+    background-repeat: no-repeat;
+}
+
+/* Character: Arpitha - Indian female - Angular PRO */
+.character-arpitha .head {
+    background-color: #c99572;
+    /* Minecraft face */
+    background-image: 
+        /* Eyes */
+        linear-gradient(to right, transparent 30%, #000 30%, #000 38%, transparent 38%, transparent 62%, #000 62%, #000 70%, transparent 70%),
+        /* Mouth - happy smile */
+        radial-gradient(ellipse at center, #000 0%, #000 50%, transparent 50%);
+    background-position: 50% 45%, 50% 75%;
+    background-size: 80% 15%, 40% 15%;
+    background-repeat: no-repeat;
+}
+
+.character-arpitha .head::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    height: 15px;
+    background-color: #222; /* Long dark hair */
+}
+
+.character-arpitha .body {
+    background-color: #b13cad; /* Purple */
+    /* T letter */
+    background-image: 
+        linear-gradient(to right, transparent 35%, #fff 35%, #fff 65%, transparent 65%),
+        linear-gradient(to bottom, #fff 0%, #fff 35%, transparent 35%);
+    background-position: 50% 30%, 50% 50%;
+    background-size: 100% 10%, 30% 60%;
+    background-repeat: no-repeat;
+}
+
+/* Character: Ben - white male with medium length hair - ticket slayer */
+.character-ben .head {
+    background-color: #f5d5a0;
+    /* Minecraft sunglasses face */
+    background-image: 
+        /* Sunglasses */
+        linear-gradient(to right, transparent 20%, #000 20%, #000 80%, transparent 80%),
+        /* Mouth */
+        linear-gradient(to right, transparent 40%, #000 40%, #000 60%, transparent 60%);
+    background-position: 50% 40%, 50% 70%;
+    background-size: 100% 20%, 60% 10%;
+    background-repeat: no-repeat;
+}
+
+.character-ben .head::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    height: 15px;
+    background-color: #6b5c4d; /* Medium brown hair */
+}
+
+.character-ben .body {
+    background-color: #2d5386; /* Blue */
+    /* Ticket icon */
+    background-image: 
+        linear-gradient(to right, transparent 40%, #fff 40%, #fff 60%, transparent 60%),
+        linear-gradient(to bottom, transparent 40%, #fff 40%, #fff 60%, transparent 60%);
+    background-position: 50% 50%, 50% 50%;
+    background-size: 20px 30px, 30px 20px;
+    background-repeat: no-repeat;
+}
+
+/* Character: Rodolfo - hispanic male, video game fan */
+.character-rodolfo .head {
+    background-color: #cfaa81;
+    /* Minecraft face */
+    background-image: 
+        /* Eyes */
+        linear-gradient(to right, transparent 30%, #000 30%, #000 38%, transparent 38%, transparent 62%, #000 62%, #000 70%, transparent 70%),
+        /* Mouth - cool smile */
+        linear-gradient(to right, transparent 35%, #000 35%, #000 40%, transparent 40%, transparent 43%, #000 43%, #000 57%, transparent 57%, transparent 60%, #000 60%, #000 65%, transparent 65%);
+    background-position: 50% 45%, 50% 70%;
+    background-size: 80% 15%, 60% 10%;
+    background-repeat: no-repeat;
+}
+
+.character-rodolfo .head::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background-color: #222; /* Dark hair */
+}
+
+.character-rodolfo .body {
+    background-color: #f39c12; /* Orange game controller */
+    background-image: 
+        /* Game controller */
+        radial-gradient(circle at center, #333 0%, #333 30%, transparent 30%);
+    background-position: 30% 30%, 70% 30%;
+    background-size: 8px 8px;
+    background-repeat: no-repeat;
+}
+
+/* Progress bar */
+#progress-container {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 20px;
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+#progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: #ff9900; /* AWS orange */
+    transition: width 0.5s linear;
+}
+
+#elapsed-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 0 0 3px white;
+}
+
+/* Objectives */
+#objectives {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255,255,255,0.8);
+    border-radius: 5px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    font-size: 0.9em;
+    z-index: 5;
+    max-width: 250px;
+}
+
+.objective {
+    margin-bottom: 5px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.objective::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+/* Cutscene styles */
+#cutscene {
+    background-color: #000;
+    color: white;
+    padding: 0;
+}
+
+#terminal-container {
+    width: 90%;
+    max-width: 700px;
+    height: 80%;
+    background-color: #222222;
+    border: 4px solid #55aa55;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(85, 170, 85, 0.4);
+    display: flex;
+    flex-direction: column;
+    image-rendering: pixelated;
+}
+
+#terminal-header {
+    height: 30px;
+    background-color: #55aa55;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    position: relative;
+    box-shadow: inset -2px -4px #3a783a, inset 2px 2px #78cc78;
+}
+
+.terminal-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.terminal-btn-red {
+    background-color: #ff5f56;
+}
+
+.terminal-btn-yellow {
+    background-color: #ffbd2e;
+}
+
+.terminal-btn-green {
+    background-color: #27c93f;
+}
+
+#terminal-title {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    left: 0;
+    color: #aaa;
+    font-size: 0.9em;
+}
+
+#terminal-body {
+    flex: 1;
+    background-color: #222222;
+    padding: 20px;
+    font-family: 'Minecraft', 'Courier New', monospace;
+    color: #ffffff; /* Changed to white for better readability */
+    display: flex;
+    font-size: 1.2em;
+    line-height: 1.6;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: inset 2px 2px rgba(255,255,255,0.1), inset -2px -2px rgba(0,0,0,0.3);
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.5); /* Added text shadow for better contrast */
+}
+
+#terminal-prompt {
+    color: #00aaff; /* Changed to blue for better readability */
+    margin-right: 8px;
+    text-shadow: 0 0 3px rgba(0, 170, 255, 0.7);
+}
+
+.bad-report {
+    color: #ff5555;
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(255, 85, 85, 0.7);
+}
+
+.good-report {
+    color: #55aa55;
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(85, 170, 85, 0.7);
+}
+
+#cutscene-content {
+    color: #ffffff; /* Changed to white for better readability */
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+#terminal-cursor {
+    display: inline-block;
+    width: 10px;
+    height: 20px;
+    background-color: #ffffff; /* Changed to white */
+    animation: blink 1s infinite;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+#skip-cutscene {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    font-size: 0.9em;
+    z-index: 10;
+}
+
+/* Game over styles */
+#game-over {
+    background-color: #2c3e50;
+    color: white;
+    text-align: center;
+}
+
+#game-stats {
+    margin: 20px 0;
+    font-size: 1.2em;
+    line-height: 1.6;
+}
+
+#final-score {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #3498db;
+    margin: 15px 0;
+}
+
+/* Report styles */
+.report {
+    width: 76px;
+    height: 90px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, opacity 0.5s;
+    border: 2px solid #ddd;
+    background-color: white;
+    background-image: linear-gradient(to bottom, #f9f9f9, #eaeaea);
+    z-index: 1;
+    transform-origin: center bottom;
+    user-select: none;
+}
+
+.report::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 15px;
+    border-radius: 3px 3px 0 0;
+}
+
+.report-icon {
+    font-size: 1.8em;
+    margin-bottom: 5px;
+}
+
+.report:hover {
+    transform: scale(1.1) rotate(2deg);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    z-index: 5;
+}
+
+.report.alarm {
+    animation: alarm 0.4s infinite alternate;
+}
+
+@keyframes alarm {
+    0% {
+        transform: rotate(-5deg) translateY(0);
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+    }
+    100% {
+        transform: rotate(5deg) translateY(-3px);
+        box-shadow: 0 0 25px rgba(255, 0, 0, 0.9);
+    }
+}
+
+.report.progress {
+    animation: being-fixed 0.4s forwards;
+}
+
+@keyframes being-fixed {
+    0% { transform: scale(1) rotate(0); }
+    25% { transform: scale(1.1) rotate(-5deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+.report.fixed {
+    animation: fly-to-cloud 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+}
+
+@keyframes fly-to-cloud {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0);
+        opacity: 1;
+    }
+    20% {
+        transform: translate(0, -30px) scale(1.1) rotate(5deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(0, -100px) scale(0.9) rotate(-5deg);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(0, -300px) scale(0.3) rotate(0);
+        opacity: 0;
+    }
+}
+
+/* Whack effect */
+.report-whack {
+    position: absolute;
+    font-size: 2em;
+    pointer-events: none;
+    z-index: 10;
+    animation: whack-effect 0.5s forwards;
+}
+
+@keyframes whack-effect {
+    0% { 
+        transform: scale(0.5) rotate(-10deg); 
+        opacity: 1;
+    }
+    100% { 
+        transform: scale(1.5) rotate(10deg);
+        opacity: 0;
+    }
+}
+
+.report-error {
+    border-color: #d13212;
+}
+
+.report-error::before {
+    background-color: #d13212; /* AWS red */
+}
+
+.report-warning {
+    border-color: #ff9900;
+}
+
+.report-warning::before {
+    background-color: #ff9900; /* AWS orange */
+}
+
+.report-info {
+    border-color: #1a73e8;
+}
+
+.report-info::before {
+    background-color: #1a73e8; /* AWS blue */
+}
+
+.report-name {
+    font-size: 0.7em;
+    font-weight: bold;
+    margin-top: 3px;
+    color: #333;
+    text-transform: uppercase;
+}
+
+/* AWS cloud */
+#aws-cloud {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px; /* Even larger cloud */
+    height: 120px; /* Even taller cloud */
+    background-color: #ff9900; /* AWS orange */
+    border: 4px solid #d88a00;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.8em; /* Larger text */
+    box-shadow: 0 5px 30px rgba(255, 153, 0, 0.8); /* More glow */
+    z-index: 200; /* Ensure it's above reports */
+    font-family: 'Minecraft', Arial, sans-serif; /* Multiple fallback fonts */
+    text-transform: uppercase;
+    animation: cloud-pulse 4s infinite alternate;
+    image-rendering: pixelated;
+    
+    /* Minecraft cloud style with AWS colors */
+    box-shadow: 
+        inset 5px 5px 0 rgba(255, 255, 255, 0.3),
+        inset -5px -5px 0 rgba(150, 90, 0, 0.5),
+        0 0 30px rgba(255, 153, 0, 0.9);
+    text-shadow: 2px 2px 0 #232f3e; /* AWS blue text shadow */
+}
+
+@keyframes cloud-pulse {
+    0% { 
+        box-shadow: 
+            inset 5px 5px 0 rgba(255, 255, 255, 0.3),
+            inset -5px -5px 0 rgba(150, 90, 0, 0.5),
+            0 0 20px rgba(255, 153, 0, 0.7);
+        transform: translateX(-50%) scale(1);
+    }
+    100% { 
+        box-shadow: 
+            inset 5px 5px 0 rgba(255, 255, 255, 0.4),
+            inset -5px -5px 0 rgba(150, 90, 0, 0.6),
+            0 0 35px rgba(255, 153, 0, 1);
+        transform: translateX(-50%) scale(1.03);
+    }
+}
+
+#aws-cloud::before, #aws-cloud::after {
+    content: '';
+    position: absolute;
+    background-color: #378b37;
+    border-radius: 0;
+    border: 2px solid #55aa55;
+}
+
+#aws-cloud::before {
+    width: 40px;
+    height: 40px;
+    top: -20px;
+    left: 30px;
+}
+
+#aws-cloud::after {
+    width: 50px;
+    height: 50px;
+    top: -25px;
+    right: 30px;
+}
+
+/* AWS Logo */
+#aws-cloud::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 30px;
+    background: none;
+    border: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 304 182"><path d="M86.4 66.4c0 3.7.4 6.7 1.1 8.9.8 2.2 1.8 4.6 3.2 7.2.5.8.7 1.6.7 2.3 0 1-.6 2-1.9 3L83.2 92c-.9.6-1.8.9-2.6.9-1 0-2-.5-3-1.4-1.4-1.5-2.6-3.1-3.6-4.7-1-1.7-2-3.6-3.1-5.9-7.8 9.2-17.6 13.8-29.4 13.8-8.4 0-15.1-2.4-20-7.2-4.9-4.8-7.4-11.2-7.4-19.2 0-8.5 3-15.4 9.1-20.6 6.1-5.2 14.2-7.8 24.5-7.8 3.4 0 6.9.3 10.6.8 3.7.5 7.5 1.3 11.5 2.2v-7.3c0-7.6-1.6-12.9-4.7-16-3.2-3.1-8.6-4.6-16.3-4.6-3.5 0-7.1.4-10.8 1.3-3.7.9-7.3 2-10.8 3.4-1.6.7-2.8 1.1-3.5 1.3-.7.2-1.2.3-1.6.3-1.4 0-2.1-1-2.1-3.1v-4.9c0-1.6.2-2.8.7-3.5.5-.7 1.4-1.4 2.8-2.1 3.5-1.8 7.7-3.3 12.6-4.5C41 1.9 46.2 1.3 51.7 1.3c11.9 0 20.6 2.7 26.2 8.1 5.5 5.4 8.3 13.6 8.3 24.6v32.4zM45.8 81.6c3.3 0 6.7-.6 10.3-1.8 3.6-1.2 6.8-3.4 9.5-6.4 1.6-1.9 2.8-4 3.4-6.4.6-2.4 1-5.3 1-8.7v-4.2c-2.9-.7-6-1.3-9.2-1.7-3.2-.4-6.3-.6-9.4-.6-6.7 0-11.6 1.3-14.9 4-3.3 2.7-4.9 6.5-4.9 11.5 0 4.7 1.2 8.2 3.7 10.6 2.4 2.5 5.9 3.7 10.5 3.7zm80.3 10.8c-1.8 0-3-.3-3.8-1-.8-.6-1.5-2-2.1-3.9L96.7 10.2c-.6-2-.9-3.3-.9-4 0-1.6.8-2.5 2.4-2.5h9.8c1.9 0 3.2.3 3.9 1 .8.6 1.4 2 2 3.9l16.8 66.2 15.6-66.2c.5-2 1.1-3.3 1.9-3.9.8-.6 2.2-1 4-1h8c1.9 0 3.2.3 4 1 .8.6 1.5 2 1.9 3.9l15.8 67 17.3-67c.6-2 1.3-3.3 2-3.9.8-.6 2.1-1 3.9-1h9.3c1.6 0 2.5.8 2.5 2.5 0 .5-.1 1-.2 1.6-.1.6-.3 1.4-.7 2.5l-24.1 77.3c-.6 2-1.3 3.3-2.1 3.9-.8.6-2.1 1-3.8 1h-8.6c-1.9 0-3.2-.3-4-1-.8-.7-1.5-2-1.9-4L156 23l-15.4 64.4c-.5 2-1.1 3.3-1.9 4-.8.7-2.2 1-4 1h-8.6zm128.5 2.7c-5.2 0-10.4-.6-15.4-1.8-5-1.2-8.9-2.5-11.5-4-1.6-.9-2.7-1.9-3.1-2.8-.4-.9-.6-1.9-.6-2.8v-5.1c0-2.1.8-3.1 2.3-3.1.6 0 1.2.1 1.8.3.6.2 1.5.6 2.5 1 3.4 1.5 7.1 2.7 11 3.5 4 .8 7.9 1.2 11.9 1.2 6.3 0 11.2-1.1 14.6-3.3 3.4-2.2 5.2-5.4 5.2-9.5 0-2.8-.9-5.1-2.7-7-1.8-1.9-5.2-3.6-10.1-5.2L246 52c-7.3-2.3-12.7-5.7-16-10.2-3.3-4.4-5-9.3-5-14.5 0-4.2.9-7.9 2.7-11.1 1.8-3.2 4.2-6 7.2-8.2 3-2.3 6.4-4 10.4-5.2 4-1.2 8.2-1.7 12.6-1.7 2.2 0 4.5.1 6.7.4 2.3.3 4.4.7 6.5 1.1 2 .5 3.9 1 5.7 1.6 1.8.6 3.2 1.2 4.2 1.8 1.4.8 2.4 1.6 3 2.5.6.8.9 1.9.9 3.3v4.7c0 2.1-.8 3.2-2.3 3.2-.8 0-2.1-.4-3.8-1.2-5.7-2.6-12.1-3.9-19.2-3.9-5.7 0-10.2.9-13.3 2.8-3.1 1.9-4.7 4.8-4.7 8.9 0 2.8 1 5.2 3 7.1 2 1.9 5.7 3.8 11 5.5l14.2 4.5c7.2 2.3 12.4 5.5 15.5 9.6 3.1 4.1 4.6 8.8 4.6 14 0 4.3-.9 8.2-2.6 11.6-1.8 3.4-4.2 6.4-7.3 8.8-3.1 2.5-6.8 4.3-11.1 5.6-4.5 1.4-9.2 2.1-14.3 2.1z" fill="%23fff"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.clicks-needed {
+    position: absolute;
+    bottom: -15px;
+    font-size: 12px;
+    background-color: white;
+    padding: 2px 5px;
+    border-radius: 10px;
+    z-index: 10;
+}
+
+/* Animations */
+@keyframes float-up {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}
+
+@keyframes fly-text {
+    0% { transform: translateY(0); opacity: 1; }
+    40% { transform: translateY(-30px); opacity: 1; }
+    100% { transform: translateY(-50px) translateX(30px); opacity: 0; }
+}
+
+@keyframes fade-in-out {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.report.progress {
+    animation: pulse 0.3s;
+}
+
+.points-animation {
+    position: absolute;
+    animation: float-up 1s forwards;
+}
+
+.level-up-animation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    font-weight: bold;
+    color: #2ecc71;
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.7);
+    animation: fade-in-out 2s forwards;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #game-container {
+        height: 100vh;
+        max-width: 100%;
+        border-radius: 0;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    h2 {
+        font-size: 1.2em;
+    }
+    
+    .character-grid {
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .character {
+        width: 80px;
+    }
+    
+    .character-avatar {
+        width: 60px;
+        height: 60px;
+    }
+    
+    #hud {
+        font-size: 0.9em;
+        padding: 8px 10px;
+        flex-wrap: wrap;
+    }
+    
+    #workstation-area {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .workstation {
+        margin: 5px;
+        transform: scale(0.8);
+    }
+    
+    .data-screen {
+        width: 150px;
+        height: 60px;
+        right: 2%;
+    }
+    
+    #objectives {
+        max-width: 200px;
+        font-size: 0.8em;
+    }
+    
+    #tools-container {
+        flex-wrap: wrap;
+    }
+    
+    .tool {
+        padding: 5px 10px;
+        margin: 5px;
+    }
+    
+    .tool-icon {
+        font-size: 1.5em;
+    }
+}
+
+/* Small mobile screens */
+@media (max-width: 480px) {
+    .character-grid {
+        gap: 5px;
+    }
+    
+    .character {
+        width: 70px;
+    }
+    
+    .character-name, .character-desc {
+        font-size: 0.8em;
+    }
+    
+    #hud {
+        font-size: 0.8em;
+        padding: 5px;
+    }
+    
+    .tool {
+        padding: 3px 8px;
+    }
+    
+    .tool-name {
+        font-size: 0.8em;
+    }
+}
+
+/* Floating reports - these are the clickable reports that appear in the data center */
+.floating-report {
+    background-color: white;
+    width: 220px; /* Larger width */
+    height: 110px; /* Larger height */
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Minecraft', 'Arial', monospace; /* Fallback fonts */
+    position: relative;
+    overflow: hidden;
+    transform-origin: center;
+    z-index: 100 !important; /* Make sure reports are always on top */
+    pointer-events: auto !important; /* Force clickable */
+}
+
+.floating-report::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background-color: #3498db; /* Default blue header */
+}
+
+.floating-report.report-error::before {
+    background-color: #e74c3c; /* Red for errors */
+}
+
+.floating-report.report-warning::before {
+    background-color: #f39c12; /* Orange for warnings */
+}
+
+.floating-report.report-info::before {
+    background-color: #3498db; /* Blue for info/good reports */
+}
+
+.floating-report-icon {
+    font-size: 32px; /* Larger icon */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+}
+
+.floating-report-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-top: 8px;
+}
+
+.floating-report-service {
+    font-weight: bold;
+    font-size: 20px; /* Larger font */
+    text-align: center;
+    color: #232f3e; /* AWS blue */
+}
+
+.floating-report-error {
+    font-size: 16px; /* Larger font */
+    text-align: center;
+    margin-top: 4px;
+    padding: 3px;
+    border-radius: 4px;
+    color: #555;
+}
+
+.floating-report-status {
+    font-size: 14px; /* Larger font */
+    font-weight: bold;
+    text-align: center;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-top: auto;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+}
+
+.floating-report.report-error .floating-report-status {
+    color: #e74c3c;
+}
+
+.floating-report.report-warning .floating-report-status {
+    color: #f39c12;
+}
+
+.floating-report.report-info .floating-report-status {
+    color: #3498db;
+}
+
+/* Animations for floating reports - more visible and intense */
+@keyframes floating-error-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); }
+    100% { transform: scale(1.08); box-shadow: 0 0 25px rgba(255, 0, 0, 0.8); }
+}
+
+@keyframes floating-warning-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 12px rgba(255, 153, 0, 0.6); }
+    100% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 153, 0, 0.8); }
+}
+
+@keyframes floating-info-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 8px rgba(0, 153, 255, 0.4); }
+    100% { transform: scale(1.03); box-shadow: 0 0 15px rgba(0, 153, 255, 0.6); }
+}
+
+/* More intense animations for alarming reports */
+@keyframes floating-error-alarm {
+    0% { transform: scale(1) rotate(-1.5deg); box-shadow: 0 0 20px rgba(255, 0, 0, 0.9); }
+    100% { transform: scale(1.12) rotate(1.5deg); box-shadow: 0 0 30px rgba(255, 0, 0, 1); }
+}
+
+@keyframes floating-warning-alarm {
+    0% { transform: scale(1) rotate(-1deg); box-shadow: 0 0 18px rgba(255, 153, 0, 0.8); }
+    100% { transform: scale(1.08) rotate(1deg); box-shadow: 0 0 25px rgba(255, 153, 0, 1); }
+}
+
+/* Mistake shake animation */
+.floating-report.mistake {
+    animation: mistake-shake 0.5s !important;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
+}
+
+/* Progress animation */
+.floating-report.progress {
+    animation: pulse 0.3s !important;
+}
+
+/* Cloud animation for fixed reports - more dramatic */
+@keyframes fly-to-cloud {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0);
+        opacity: 1;
+    }
+    20% {
+        transform: translate(0, -40px) scale(1.1) rotate(-5deg);
+        opacity: 1;
+        box-shadow: 0 0 25px rgba(55, 200, 55, 0.8);
+    }
+    60% {
+        transform: translate(0, -150px) scale(0.8) rotate(10deg);
+        opacity: 0.9;
+        box-shadow: 0 0 30px rgba(55, 200, 55, 0.9);
+    }
+    100% {
+        transform: translate(0, -350px) scale(0.2) rotate(0);
+        opacity: 0;
+        box-shadow: 0 0 40px rgba(55, 200, 55, 1);
+    }
+}

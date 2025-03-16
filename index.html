@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Fixer - Data Center Rescue</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="description" content="Help fix stuck reports in the data center with this Minecraft-style game!">
+</head>
+<body>
+    <!-- Loading screen -->
+    <div id="loading-screen">
+        <div class="loading-block"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+    
+    <div id="game-container">
+        <div id="start-screen" class="screen">
+            <h1>Report Fixer</h1>
+            <h2>Save the Stuck Reports!</h2>
+            <div id="character-selection">
+                <h3>Choose your engineer:</h3>
+                <div class="character-grid">
+                    <div class="character minecraft-character" data-name="Ben">
+                        <div class="character-avatar">
+                            <div class="mc-head"></div>
+                            <div class="mc-body"></div>
+                            <div class="mc-legs"></div>
+                            <div class="mc-arms"></div>
+                        </div>
+                        <div class="character-name">Ben</div>
+                        <div class="character-desc">Ticket Slayer</div>
+                    </div>
+                    <div class="character minecraft-character" data-name="Zach">
+                        <div class="character-avatar">
+                            <div class="mc-head"></div>
+                            <div class="mc-body" style="background-color: #3498db;"></div>
+                            <div class="mc-legs"></div>
+                            <div class="mc-arms"></div>
+                        </div>
+                        <div class="character-name">Zach</div>
+                        <div class="character-desc">Records Pro</div>
+                    </div>
+                    <div class="character minecraft-character" data-name="Arpitha">
+                        <div class="character-avatar">
+                            <div class="mc-head" style="background-color: #c99572;"></div>
+                            <div class="mc-body" style="background-color: #b13cad;"></div>
+                            <div class="mc-legs"></div>
+                            <div class="mc-arms"></div>
+                        </div>
+                        <div class="character-name">Arpitha</div>
+                        <div class="character-desc">Angular Pro</div>
+                    </div>
+                    <div class="character minecraft-character" data-name="Michael">
+                        <div class="character-avatar">
+                            <div class="mc-head" style="background-color: #e9c9a0;"></div>
+                            <div class="mc-body" style="background-color: #e74c3c;"></div>
+                            <div class="mc-legs"></div>
+                            <div class="mc-arms"></div>
+                        </div>
+                        <div class="character-name">Michael</div>
+                        <div class="character-desc">Master of English Language</div>
+                    </div>
+                    <div class="character minecraft-character" data-name="Chris">
+                        <div class="character-avatar">
+                            <div class="mc-head" style="background-color: #f5e0c1;"></div>
+                            <div class="mc-body" style="background-color: #232f3e;"></div>
+                            <div class="mc-legs"></div>
+                            <div class="mc-arms"></div>
+                        </div>
+                        <div class="character-name">Chris</div>
+                        <div class="character-desc">AWS Aficionado</div>
+                    </div>
+                    <div class="character minecraft-character" data-name="Rodolfo">
+                        <div class="character-avatar">
+                            <div class="mc-head" style="background-color: #cfaa81;"></div>
+                            <div class="mc-body" style="background-color: #f39c12;"></div>
+                            <div class="mc-legs"></div>
+                            <div class="mc-arms"></div>
+                        </div>
+                        <div class="character-name">Rodolfo</div>
+                        <div class="character-desc">DevOps Pro</div>
+                    </div>
+                </div>
+                <button id="start-game" disabled>Enter Data Center</button>
+            </div>
+        </div>
+        <div id="game-screen" class="screen hidden">
+            <div id="hud">
+                <div id="score">Score: 0</div>
+                <div id="level">Level: 1</div>
+                <div id="timer">Time: 2:00</div>
+                <div id="character-info">Engineer: <span id="character-name"></span></div>
+            </div>
+            <div id="game-area">
+                <!-- AWS Cloud at the top -->
+                <div id="aws-cloud">Cloud Storage</div>
+                <!-- Office background -->
+                <div id="office-background"></div>
+                <!-- Workstation area with computers -->
+                <div id="workstation-area">
+                    <div class="workstation" id="workstation-1">
+                        <div class="desk"></div>
+                        <div class="computer">
+                            <div class="monitor" id="monitor-1"></div>
+                            <div class="keyboard"></div>
+                        </div>
+                    </div>
+                    <div class="workstation" id="workstation-2">
+                        <div class="desk"></div>
+                        <div class="computer">
+                            <div class="monitor" id="monitor-2"></div>
+                            <div class="keyboard"></div>
+                        </div>
+                    </div>
+                    <div class="workstation" id="workstation-3">
+                        <div class="desk"></div>
+                        <div class="computer">
+                            <div class="monitor" id="monitor-3"></div>
+                            <div class="keyboard"></div>
+                        </div>
+                    </div>
+                    <div class="workstation" id="workstation-4">
+                        <div class="desk"></div>
+                        <div class="computer">
+                            <div class="monitor" id="monitor-4"></div>
+                            <div class="keyboard"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Data center decorations -->
+                <div class="office-items">
+                    <div class="server-light left-light"></div>
+                    <div class="server-light right-light"></div>
+                    <div class="data-screen">
+                        <div class="data-text">REPORT RECOVERY SYSTEM</div>
+                    </div>
+                </div>
+                <!-- Player character -->
+                <div id="player-character">
+                    <!-- Character will be added dynamically based on selection -->
+                </div>
+                <!-- Progress and elapsed time indicator -->
+                <div id="progress-container">
+                    <div id="progress-bar"></div>
+                    <div id="elapsed-text">Time Elapsed: 0:00 / 2:00</div>
+                </div>
+                <!-- Current objectives display -->
+                <div id="objectives">
+                    <div class="objective">Click on <span style="color: #e74c3c; font-weight: bold;">stuck reports</span> (red) to fix them!</div>
+                    <div class="objective">Leave <span style="color: #3498db; font-weight: bold;">good reports</span> (blue) alone!</div>
+                    <div class="objective">Fix as many reports as possible in 2 minutes!</div>
+                </div>
+            </div>
+        </div>
+        <div id="game-over" class="screen hidden">
+            <h2>Game Over!</h2>
+            <div id="final-score">Final Score: 0</div>
+            <div id="game-stats">
+                <p>Reports fixed: <span id="reports-fixed">0</span></p>
+                <p>Levels completed: <span id="levels-completed">0</span></p>
+            </div>
+            <button id="play-again">Play Again</button>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
