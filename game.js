@@ -192,63 +192,112 @@ function addPlayerCharacter() {
     // Clear any existing content
     playerCharEl.innerHTML = '';
     
-    // Create a simple character representation
+    // Set up the game area with a data center background
+    setupDataCenterBackground();
+    
+    // Create a Minecraft-style character similar to selection screen
     const character = document.createElement('div');
-    character.className = 'player-avatar';
+    character.className = 'minecraft-character player-avatar';
     character.style.position = 'relative';
     character.style.width = '60px';
     character.style.height = '120px';
     
-    // Set up the game area with a data center background
-    setupDataCenterBackground();
-    
+    // Create character parts similar to the selection screen
     // Head
-    const head = document.createElement('div');
-    head.style.position = 'absolute';
-    head.style.top = '0';
-    head.style.left = '50%';
-    head.style.transform = 'translateX(-50%)';
-    head.style.width = '40px';
-    head.style.height = '40px';
-    head.style.backgroundColor = '#f5d5a0';
-    head.style.borderRadius = '5px';
-    character.appendChild(head);
+    const mcHead = document.createElement('div');
+    mcHead.className = 'mc-head';
+    mcHead.style.position = 'absolute';
+    mcHead.style.top = '0';
+    mcHead.style.left = '50%';
+    mcHead.style.transform = 'translateX(-50%)';
+    mcHead.style.width = '40px';
+    mcHead.style.height = '40px';
+    mcHead.style.borderRadius = '4px';
+    mcHead.style.zIndex = '2';
     
     // Body
-    const body = document.createElement('div');
-    body.style.position = 'absolute';
-    body.style.top = '40px';
-    body.style.left = '50%';
-    body.style.transform = 'translateX(-50%)';
-    body.style.width = '30px';
-    body.style.height = '40px';
-    body.style.backgroundColor = '#5d4037';
-    character.appendChild(body);
+    const mcBody = document.createElement('div');
+    mcBody.className = 'mc-body';
+    mcBody.style.position = 'absolute';
+    mcBody.style.top = '40px';
+    mcBody.style.left = '50%';
+    mcBody.style.transform = 'translateX(-50%)';
+    mcBody.style.width = '30px';
+    mcBody.style.height = '45px';
+    mcBody.style.zIndex = '1';
     
     // Legs
-    const legs = document.createElement('div');
-    legs.style.position = 'absolute';
-    legs.style.top = '80px';
-    legs.style.left = '50%';
-    legs.style.transform = 'translateX(-50%)';
-    legs.style.width = '30px';
-    legs.style.height = '40px';
-    legs.style.display = 'flex';
-    legs.style.justifyContent = 'space-between';
+    const mcLegs = document.createElement('div');
+    mcLegs.className = 'mc-legs';
+    mcLegs.style.position = 'absolute';
+    mcLegs.style.top = '85px';
+    mcLegs.style.left = '50%';
+    mcLegs.style.transform = 'translateX(-50%)';
+    mcLegs.style.width = '30px';
+    mcLegs.style.height = '35px';
+    mcLegs.style.display = 'flex';
+    mcLegs.style.justifyContent = 'space-between';
     
     const leftLeg = document.createElement('div');
     leftLeg.style.width = '12px';
     leftLeg.style.height = '100%';
-    leftLeg.style.backgroundColor = '#3d2314';
-    legs.appendChild(leftLeg);
+    leftLeg.style.backgroundColor = '#2c2c2c';
+    mcLegs.appendChild(leftLeg);
     
     const rightLeg = document.createElement('div');
     rightLeg.style.width = '12px';
     rightLeg.style.height = '100%';
-    rightLeg.style.backgroundColor = '#3d2314';
-    legs.appendChild(rightLeg);
+    rightLeg.style.backgroundColor = '#2c2c2c';
+    mcLegs.appendChild(rightLeg);
     
-    character.appendChild(legs);
+    // Arms
+    const mcArms = document.createElement('div');
+    mcArms.className = 'mc-arms';
+    mcArms.style.position = 'absolute';
+    mcArms.style.top = '40px';
+    mcArms.style.left = '50%';
+    mcArms.style.transform = 'translateX(-50%)';
+    mcArms.style.width = '50px';
+    mcArms.style.height = '45px';
+    mcArms.style.display = 'flex';
+    mcArms.style.justifyContent = 'space-between';
+    
+    const leftArm = document.createElement('div');
+    leftArm.style.width = '10px';
+    leftArm.style.height = '100%';
+    leftArm.style.backgroundColor = '#5d4037';
+    mcArms.appendChild(leftArm);
+    
+    const rightArm = document.createElement('div');
+    rightArm.style.width = '10px';
+    rightArm.style.height = '100%';
+    rightArm.style.backgroundColor = '#5d4037';
+    mcArms.appendChild(rightArm);
+    
+    // Add face to the head
+    const face = document.createElement('div');
+    face.style.position = 'absolute';
+    face.style.top = '0';
+    face.style.left = '0';
+    face.style.width = '100%';
+    face.style.height = '100%';
+    face.style.backgroundImage = `
+        linear-gradient(to right, transparent 25%, #000 25%, #000 40%, transparent 40%, transparent 60%, #000 60%, #000 75%, transparent 75%),
+        linear-gradient(to right, transparent 35%, #000 35%, #000 65%, transparent 65%)
+    `;
+    face.style.backgroundPosition = '0 40%, 0 70%';
+    face.style.backgroundSize = '100% 15%, 100% 10%';
+    face.style.backgroundRepeat = 'no-repeat';
+    mcHead.appendChild(face);
+    
+    // Apply custom styling based on character selection
+    customizeCharacter(mcHead, mcBody, mcArms, gameState.character);
+    
+    // Add parts to character
+    character.appendChild(mcHead);
+    character.appendChild(mcBody);
+    character.appendChild(mcLegs);
+    character.appendChild(mcArms);
     
     // Nameplate
     const nameplate = document.createElement('div');
@@ -269,6 +318,115 @@ function addPlayerCharacter() {
     playerCharEl.appendChild(character);
 }
 
+// Function to customize character appearance based on selection
+function customizeCharacter(head, body, arms, characterName) {
+    // Default skin tone and colors
+    let skinColor = '#f5d5a0';
+    let shirtColor = '#5d4037';
+    
+    // Customize based on character
+    switch(characterName) {
+        case 'Ben':
+            // Default colors
+            break;
+        case 'Zach':
+            skinColor = '#f8dcbb';
+            shirtColor = '#3498db';
+            // Add glasses
+            const zachGlasses = document.createElement('div');
+            zachGlasses.style.position = 'absolute';
+            zachGlasses.style.top = '40%';
+            zachGlasses.style.left = '15%';
+            zachGlasses.style.width = '70%';
+            zachGlasses.style.height = '15%';
+            zachGlasses.style.border = '2px solid #333';
+            zachGlasses.style.borderRadius = '2px';
+            zachGlasses.style.zIndex = '5';
+            head.appendChild(zachGlasses);
+            break;
+        case 'Arpitha':
+            skinColor = '#c99572';
+            shirtColor = '#b13cad';
+            // Add dark hair
+            const arpithaHair = document.createElement('div');
+            arpithaHair.style.position = 'absolute';
+            arpithaHair.style.top = '0';
+            arpithaHair.style.left = '0';
+            arpithaHair.style.width = '100%';
+            arpithaHair.style.height = '20%';
+            arpithaHair.style.backgroundColor = '#222222';
+            arpithaHair.style.zIndex = '2';
+            head.appendChild(arpithaHair);
+            break;
+        case 'Michael':
+            skinColor = '#e9c9a0';
+            shirtColor = '#e74c3c';
+            // Add glasses and grey hair
+            const michaelGlasses = document.createElement('div');
+            michaelGlasses.style.position = 'absolute';
+            michaelGlasses.style.top = '40%';
+            michaelGlasses.style.left = '15%';
+            michaelGlasses.style.width = '70%';
+            michaelGlasses.style.height = '15%';
+            michaelGlasses.style.border = '2px solid #333';
+            michaelGlasses.style.borderRadius = '2px';
+            michaelGlasses.style.zIndex = '5';
+            head.appendChild(michaelGlasses);
+            
+            const michaelHair = document.createElement('div');
+            michaelHair.style.position = 'absolute';
+            michaelHair.style.top = '0';
+            michaelHair.style.left = '0';
+            michaelHair.style.width = '100%';
+            michaelHair.style.height = '20%';
+            michaelHair.style.backgroundColor = '#aaaaaa';
+            michaelHair.style.zIndex = '2';
+            head.appendChild(michaelHair);
+            break;
+        case 'Chris':
+            skinColor = '#f5e0c1';
+            shirtColor = '#232f3e';
+            break;
+        case 'Rodolfo':
+            skinColor = '#cfaa81';
+            shirtColor = '#f39c12';
+            // Add dark hair and beard
+            const rodolfoHair = document.createElement('div');
+            rodolfoHair.style.position = 'absolute';
+            rodolfoHair.style.top = '0';
+            rodolfoHair.style.left = '0';
+            rodolfoHair.style.width = '100%';
+            rodolfoHair.style.height = '20%';
+            rodolfoHair.style.backgroundColor = '#222222';
+            rodolfoHair.style.zIndex = '2';
+            head.appendChild(rodolfoHair);
+            
+            const rodolfoBeard = document.createElement('div');
+            rodolfoBeard.style.position = 'absolute';
+            rodolfoBeard.style.bottom = '0';
+            rodolfoBeard.style.left = '30%';
+            rodolfoBeard.style.width = '40%';
+            rodolfoBeard.style.height = '15%';
+            rodolfoBeard.style.backgroundColor = '#222222';
+            rodolfoBeard.style.zIndex = '3';
+            head.appendChild(rodolfoBeard);
+            break;
+        default:
+            // Default colors
+            break;
+    }
+    
+    // Apply the colors
+    head.style.backgroundColor = skinColor;
+    body.style.backgroundColor = shirtColor;
+    
+    // Update arms to match shirt color
+    const armElements = arms.querySelectorAll('div');
+    armElements.forEach(arm => {
+        arm.style.backgroundColor = shirtColor;
+    });
+}
+
 // Create initial reports to get the game started
 function createInitialReports() {
     // Create several reports immediately
@@ -276,6 +434,91 @@ function createInitialReports() {
         setTimeout(() => {
             spawnReport();
         }, i * 300);
+    }
+}
+
+// Setup a data center background with racks of computers
+function setupDataCenterBackground() {
+    const gameArea = document.getElementById('game-area');
+    if (!gameArea) return;
+    
+    // Clear any existing content except player character
+    const playerChar = document.getElementById('player-character');
+    const existingContent = Array.from(gameArea.children);
+    existingContent.forEach(child => {
+        if (child.id !== 'player-character') {
+            gameArea.removeChild(child);
+        }
+    });
+    
+    // Add cloud
+    const cloud = document.createElement('div');
+    cloud.id = 'aws-cloud';
+    cloud.className = 'cloud';
+    cloud.style.position = 'absolute';
+    cloud.style.top = '20px';
+    cloud.style.left = '50%';
+    cloud.style.transform = 'translateX(-50%)';
+    cloud.style.width = '280px';
+    cloud.style.height = '80px';
+    cloud.style.zIndex = '1000';
+    
+    // Create cloud content with better layout
+    const cloudIcon = document.createElement('div');
+    cloudIcon.className = 'cloud-icon';
+    cloudIcon.textContent = '☁️';
+    
+    const cloudText = document.createElement('div');
+    cloudText.className = 'cloud-text';
+    cloudText.innerHTML = 'CLOUD STORAGE';
+    
+    cloud.appendChild(cloudIcon);
+    cloud.appendChild(cloudText);
+    
+    gameArea.appendChild(cloud);
+    
+    // Create server rack rows
+    const rackRows = 3;
+    const racksPerRow = 5;
+    
+    for (let row = 0; row < rackRows; row++) {
+        for (let i = 0; i < racksPerRow; i++) {
+            // Create server rack
+            const rack = document.createElement('div');
+            rack.className = 'server-rack';
+            rack.style.position = 'absolute';
+            rack.style.width = '70px';
+            rack.style.height = '140px';
+            rack.style.backgroundColor = '#1c232e';
+            rack.style.border = '2px solid #252f40';
+            rack.style.borderRadius = '3px';
+            rack.style.top = `${120 + row * 160}px`;
+            rack.style.left = `${50 + i * 120}px`;
+            rack.style.zIndex = '2';
+            
+            // Add blinking lights
+            for (let j = 0; j < 6; j++) {
+                const light = document.createElement('div');
+                light.className = 'server-light';
+                light.style.position = 'absolute';
+                light.style.width = '6px';
+                light.style.height = '6px';
+                light.style.borderRadius = '50%';
+                light.style.top = `${10 + j * 20}px`;
+                light.style.right = '10px';
+                
+                const colors = ['#55ff55', '#ff5555', '#55aaff'];
+                light.style.backgroundColor = colors[j % colors.length];
+                light.style.boxShadow = `0 0 5px ${colors[j % colors.length]}`;
+                light.style.animation = 'blink 1.5s infinite alternate';
+                light.style.animationDelay = `${Math.random() * 2}s`;
+                
+                rack.appendChild(light);
+            }
+            
+            // Add rack to game area
+            gameArea.appendChild(rack);
+        }
     }
 }
 
@@ -291,19 +534,52 @@ function spawnReport() {
     const report = document.createElement('div');
     report.className = isBad ? 'bad-report' : 'good-report';
     report.style.position = 'absolute';
-    report.style.width = '120px';
-    report.style.height = '90px';
-    report.style.backgroundColor = isBad ? '#e74c3c' : '#2ecc71'; // Red for bad, Green for good
+    report.style.width = '130px';
+    report.style.height = '160px';
+    report.style.backgroundColor = 'white';
     report.style.borderRadius = '3px';
     report.style.padding = '10px';
     report.style.boxShadow = isBad ? 
         '0 0 15px rgba(255, 0, 0, 0.7)' : 
         '0 0 15px rgba(46, 204, 113, 0.7)';
-    report.style.color = 'white';
+    report.style.color = '#333';
     report.style.fontWeight = 'bold';
     report.style.fontSize = '14px';
     report.style.cursor = isBad ? 'pointer' : 'default';
     report.style.zIndex = '100';
+    
+    // Add paper texture and corner fold
+    report.style.backgroundImage = 'linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px)';
+    report.style.backgroundSize = '100% 20px';
+    
+    // Add a colored status tag at the top
+    const statusTag = document.createElement('div');
+    statusTag.style.position = 'absolute';
+    statusTag.style.top = '0';
+    statusTag.style.left = '0';
+    statusTag.style.width = '100%';
+    statusTag.style.height = '25px';
+    statusTag.style.backgroundColor = isBad ? '#e74c3c' : '#2ecc71';
+    statusTag.style.borderTopLeftRadius = '3px';
+    statusTag.style.borderTopRightRadius = '3px';
+    statusTag.style.color = 'white';
+    statusTag.style.textAlign = 'center';
+    statusTag.style.lineHeight = '25px';
+    statusTag.style.fontSize = '12px';
+    statusTag.style.fontWeight = 'bold';
+    statusTag.textContent = isBad ? 'STUCK REPORT' : 'GOOD REPORT';
+    report.appendChild(statusTag);
+    
+    // Create the folded corner effect
+    const cornerFold = document.createElement('div');
+    cornerFold.style.position = 'absolute';
+    cornerFold.style.top = '0';
+    cornerFold.style.right = '0';
+    cornerFold.style.width = '25px';
+    cornerFold.style.height = '25px';
+    cornerFold.style.background = 'linear-gradient(135deg, transparent 50%, #f0f0f0 50%)';
+    cornerFold.style.borderTopRightRadius = '3px';
+    report.appendChild(cornerFold);
     
     // Position randomly (avoid top area)
     const gameAreaRect = gameArea.getBoundingClientRect();
@@ -324,15 +600,40 @@ function spawnReport() {
         badMessages[Math.floor(Math.random() * badMessages.length)] : 
         goodMessages[Math.floor(Math.random() * goodMessages.length)];
     
-    report.innerHTML = `
-        <div style="text-align: center; margin-bottom: 5px;">
-            ${isBad ? '⚠️' : '✅'} ${randomService}
+    // Create the report content
+    const contentDiv = document.createElement('div');
+    contentDiv.style.marginTop = '30px';
+    contentDiv.style.position = 'relative';
+    contentDiv.style.height = 'calc(100% - 30px)';
+    
+    contentDiv.innerHTML = `
+        <div style="text-align: center; margin: 8px 0; font-size: 16px; font-weight: bold;">
+            ${randomService} Report
         </div>
-        <div style="font-size: 12px; margin-top: 5px;">
-            <div>Status: ${message}</div>
-            <div>Region: us-west-${Math.floor(Math.random() * 3) + 1}</div>
+        <div style="font-size: 12px; margin-top: 15px; text-align: left;">
+            <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
+                <span>Status:</span> 
+                <span style="color: ${isBad ? '#e74c3c' : '#2ecc71'}; font-weight: bold;">${message}</span>
+            </div>
+            <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
+                <span>Region:</span> 
+                <span>us-west-${Math.floor(Math.random() * 3) + 1}</span>
+            </div>
+            <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
+                <span>Time:</span> 
+                <span>${new Date().toLocaleTimeString()}</span>
+            </div>
+            <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
+                <span>ID:</span> 
+                <span>RPT-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}</span>
+            </div>
+        </div>
+        <div style="position: absolute; bottom: 10px; width: 100%; text-align: center; font-size: 10px; color: #888;">
+            ${isBad ? 'Action Required' : 'No Action Needed'}
         </div>
     `;
+    
+    report.appendChild(contentDiv);
     
     // Add the report to the game area
     gameArea.appendChild(report);
@@ -374,16 +675,29 @@ function spawnReport() {
             
             // Mark as fixed
             this.classList.add('fixed');
-            this.style.backgroundColor = '#2ecc71'; // Green for fixed
+            this.style.backgroundColor = 'white';
             this.style.animation = 'none';
-            this.innerHTML = `
-                <div style="text-align: center; font-size: 24px;">
-                    ✅
-                </div>
-                <div style="text-align: center; font-size: 16px;">
-                    FIXED
-                </div>
-            `;
+            
+            // Clear existing content
+            this.innerHTML = '';
+            
+            // Add stamped "FIXED" message
+            const stamp = document.createElement('div');
+            stamp.style.position = 'absolute';
+            stamp.style.top = '50%';
+            stamp.style.left = '50%';
+            stamp.style.transform = 'translate(-50%, -50%) rotate(-25deg)';
+            stamp.style.border = '4px solid #2ecc71';
+            stamp.style.borderRadius = '10px';
+            stamp.style.padding = '5px 15px';
+            stamp.style.color = '#2ecc71';
+            stamp.style.fontSize = '28px';
+            stamp.style.fontWeight = 'bold';
+            stamp.style.textTransform = 'uppercase';
+            stamp.style.textAlign = 'center';
+            stamp.style.letterSpacing = '2px';
+            stamp.textContent = 'FIXED';
+            this.appendChild(stamp);
             
             // Add points and update score
             gameState.score += 10;
@@ -626,14 +940,14 @@ function addGameAnimations() {
     style.id = 'game-animations';
     style.textContent = `
         @keyframes report-pulse {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 0, 0, 0.6); }
-            100% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
+            0% { transform: scale(1) rotate(0deg); box-shadow: 0 0 10px rgba(255, 0, 0, 0.6); }
+            100% { transform: scale(1.05) rotate(2deg); box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
         }
         
         @keyframes report-float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0); }
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(-1deg); }
+            100% { transform: translateY(0) rotate(0deg); }
         }
         
         #player-character {
