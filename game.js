@@ -530,23 +530,35 @@ function spawnReport() {
     // Determine if this is a bad report (needs fixing) or good report
     const isBad = Math.random() < 0.6;
     
-    // Create the report element
+    // Create the report element with responsive sizing
     const report = document.createElement('div');
     report.className = isBad ? 'bad-report' : 'good-report';
     report.style.position = 'absolute';
-    report.style.width = '130px';
-    report.style.height = '160px';
+    
+    // Adjust size for mobile devices
+    const isMobile = window.innerWidth < 480;
+    const reportWidth = isMobile ? '100px' : '130px';
+    const reportHeight = isMobile ? '140px' : '160px';
+    const fontSize = isMobile ? '12px' : '14px';
+    
+    report.style.width = reportWidth;
+    report.style.height = reportHeight;
     report.style.backgroundColor = 'white';
     report.style.borderRadius = '3px';
-    report.style.padding = '10px';
+    report.style.padding = isMobile ? '8px' : '10px';
     report.style.boxShadow = isBad ? 
         '0 0 15px rgba(255, 0, 0, 0.7)' : 
         '0 0 15px rgba(46, 204, 113, 0.7)';
     report.style.color = '#333';
     report.style.fontWeight = 'bold';
-    report.style.fontSize = '14px';
+    report.style.fontSize = fontSize;
     report.style.cursor = isBad ? 'pointer' : 'default';
     report.style.zIndex = '100';
+    
+    // Make reports larger hit targets on mobile for easier tapping
+    if (isMobile && isBad) {
+        report.style.touchAction = 'manipulation';
+    }
     
     // Add paper texture and corner fold
     report.style.backgroundImage = 'linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px)';
@@ -600,38 +612,64 @@ function spawnReport() {
         badMessages[Math.floor(Math.random() * badMessages.length)] : 
         goodMessages[Math.floor(Math.random() * goodMessages.length)];
     
-    // Create the report content
+    // Create the report content - responsive for mobile
     const contentDiv = document.createElement('div');
     contentDiv.style.marginTop = '30px';
     contentDiv.style.position = 'relative';
     contentDiv.style.height = 'calc(100% - 30px)';
     
-    contentDiv.innerHTML = `
-        <div style="text-align: center; margin: 8px 0; font-size: 16px; font-weight: bold;">
-            ${randomService} Report
-        </div>
-        <div style="font-size: 12px; margin-top: 15px; text-align: left;">
-            <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
-                <span>Status:</span> 
-                <span style="color: ${isBad ? '#e74c3c' : '#2ecc71'}; font-weight: bold;">${message}</span>
+    // Simplify report content for mobile
+    if (isMobile) {
+        contentDiv.innerHTML = `
+            <div style="text-align: center; margin: 5px 0; font-size: 14px; font-weight: bold;">
+                ${randomService}
             </div>
-            <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
-                <span>Region:</span> 
-                <span>us-west-${Math.floor(Math.random() * 3) + 1}</span>
+            <div style="font-size: 11px; margin-top: 10px; text-align: left;">
+                <div style="margin-bottom: 4px; display: flex; justify-content: space-between;">
+                    <span>Status:</span> 
+                    <span style="color: ${isBad ? '#e74c3c' : '#2ecc71'}; font-weight: bold;">${message}</span>
+                </div>
+                <div style="margin-bottom: 4px; display: flex; justify-content: space-between;">
+                    <span>Region:</span> 
+                    <span>us-w${Math.floor(Math.random() * 3) + 1}</span>
+                </div>
+                <div style="margin-bottom: 4px; display: flex; justify-content: space-between;">
+                    <span>ID:</span> 
+                    <span>${Math.floor(Math.random() * 10000)}</span>
+                </div>
             </div>
-            <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
-                <span>Time:</span> 
-                <span>${new Date().toLocaleTimeString()}</span>
+            <div style="position: absolute; bottom: 5px; width: 100%; text-align: center; font-size: 9px; color: #888;">
+                ${isBad ? 'Action Required' : 'OK'}
             </div>
-            <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
-                <span>ID:</span> 
-                <span>RPT-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}</span>
+        `;
+    } else {
+        contentDiv.innerHTML = `
+            <div style="text-align: center; margin: 8px 0; font-size: 16px; font-weight: bold;">
+                ${randomService} Report
             </div>
-        </div>
-        <div style="position: absolute; bottom: 10px; width: 100%; text-align: center; font-size: 10px; color: #888;">
-            ${isBad ? 'Action Required' : 'No Action Needed'}
-        </div>
-    `;
+            <div style="font-size: 12px; margin-top: 15px; text-align: left;">
+                <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
+                    <span>Status:</span> 
+                    <span style="color: ${isBad ? '#e74c3c' : '#2ecc71'}; font-weight: bold;">${message}</span>
+                </div>
+                <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
+                    <span>Region:</span> 
+                    <span>us-west-${Math.floor(Math.random() * 3) + 1}</span>
+                </div>
+                <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
+                    <span>Time:</span> 
+                    <span>${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div style="margin-bottom: 6px; display: flex; justify-content: space-between;">
+                    <span>ID:</span> 
+                    <span>RPT-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}</span>
+                </div>
+            </div>
+            <div style="position: absolute; bottom: 10px; width: 100%; text-align: center; font-size: 10px; color: #888;">
+                ${isBad ? 'Action Required' : 'No Action Needed'}
+            </div>
+        `;
+    }
     
     report.appendChild(contentDiv);
     
@@ -663,10 +701,10 @@ function spawnReport() {
             }
         }, 2000 + Math.random() * 1000);
     } else {
-        // For bad reports, add click handler
-        report.addEventListener('click', function() {
+        // For bad reports, add click/touch handlers
+        const handleReportFix = function() {
             // Skip if already handled
-            if (this.classList.contains('fixed')) return;
+            if (report.classList.contains('fixed')) return;
             
             // Play success sound if available
             if (window.playSound) {
@@ -674,12 +712,12 @@ function spawnReport() {
             }
             
             // Mark as fixed
-            this.classList.add('fixed');
-            this.style.backgroundColor = 'white';
-            this.style.animation = 'none';
+            report.classList.add('fixed');
+            report.style.backgroundColor = 'white';
+            report.style.animation = 'none';
             
             // Clear existing content
-            this.innerHTML = '';
+            report.innerHTML = '';
             
             // Add stamped "FIXED" message
             const stamp = document.createElement('div');
@@ -691,13 +729,13 @@ function spawnReport() {
             stamp.style.borderRadius = '10px';
             stamp.style.padding = '5px 15px';
             stamp.style.color = '#2ecc71';
-            stamp.style.fontSize = '28px';
+            stamp.style.fontSize = isMobile ? '20px' : '28px';
             stamp.style.fontWeight = 'bold';
             stamp.style.textTransform = 'uppercase';
             stamp.style.textAlign = 'center';
             stamp.style.letterSpacing = '2px';
             stamp.textContent = 'FIXED';
-            this.appendChild(stamp);
+            report.appendChild(stamp);
             
             // Add points and update score
             gameState.score += 10;
@@ -706,11 +744,25 @@ function spawnReport() {
             
             // Fly to cloud after a moment
             setTimeout(() => {
-                this.style.transition = 'all 1.5s ease-out';
-                this.style.transform = 'translateY(-200px) scale(0.5)';
-                this.style.opacity = '0';
+                report.style.transition = 'all 1.5s ease-out';
+                report.style.transform = 'translateY(-200px) scale(0.5)';
+                report.style.opacity = '0';
                 
                 // Remove after animation completes
+                setTimeout(() => {
+                    if (report.parentNode) {
+                        gameArea.removeChild(report);
+                    }
+                }, 1500);
+            }, 500);
+        };
+        
+        // Add both click and touch handlers for better mobile response
+        report.addEventListener('click', handleReportFix);
+        report.addEventListener('touchend', function(e) {
+            e.preventDefault(); // Prevent double events on mobile
+            handleReportFix();
+        });
                 setTimeout(() => {
                     if (this.parentNode) {
                         gameArea.removeChild(this);
