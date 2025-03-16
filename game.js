@@ -13,178 +13,93 @@ const gameState = {
 };
 
 // Initialize the game when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM content loaded, initializing game...");
+window.addEventListener('load', function() {
+    console.log("Window loaded, initializing game...");
 
-    // Hide the loading screen after a short delay
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-        setTimeout(() => {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 500);
-        }, 800);
+    // Force document to proper viewport on mobile
+    const viewport = document.querySelector("meta[name=viewport]");
+    if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
     }
-    
-    // Add game animations
-    addGameAnimations();
-    
-    // Set up character selection
-    setupCharacterSelection();
-    
-    // Initialize audio
-    initializeAudio();
 
-    // Auto-select first character after a short delay to help with testing
-    setTimeout(() => {
-        if (!gameState.character) {
-            const characters = document.querySelectorAll('.character');
-            if (characters.length > 0) {
-                // Manually trigger selection on first character
-                // Remove selected class from all characters
-                characters.forEach(c => c.classList.remove('selected'));
-                
-                // Add selected class to first character
-                characters[0].classList.add('selected');
-                
-                // Store selected character
-                gameState.character = characters[0].dataset.name;
-                console.log("Auto-selected character:", gameState.character);
-                
-                // Enable start button
-                const startButton = document.getElementById('start-game');
-                if (startButton) {
-                    startButton.disabled = false;
-                    startButton.style.cursor = 'pointer';
-                    startButton.style.opacity = '1';
-                }
-                
-                // Play select sound if available
-                if (window.playSound) {
-                    window.playSound('select');
-                }
-            }
+    // Apply mobile optimizations
+    document.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+    }, { passive: false });
+    
+    // Hide the loading screen after a brief delay to ensure all elements are ready
+    setTimeout(function() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
         }
-    }, 1000);
+        
+        try {
+            // Basic setup - simplified for reliability
+            addGameAnimations();
+            setupCharacterSelection();
+            initializeAudio();
+        } catch (error) {
+            console.error("Error during initialization:", error);
+            // Continue anyway so the game is at least usable
+        }
+    }, 200); // Short delay to ensure DOM is fully ready
 });
 
-// Set up character selection
+// Set up character selection - super simple version for reliability on mobile
 function setupCharacterSelection() {
-    const characters = document.querySelectorAll('.character');
-    const startButton = document.getElementById('start-game');
-    
-    if (startButton) {
-        startButton.disabled = true;
-        startButton.style.opacity = '0.7';
-        startButton.style.cursor = 'not-allowed';
-    }
-    
-    // Add click and touch listeners to each character
-    characters.forEach(character => {
-        // Function to handle character selection
-        const handleCharacterSelect = function(e) {
-            // Prevent default touch behavior and propagation
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            
-            // Play select sound if available
-            if (window.playSound) {
-                window.playSound('select');
-            }
-            
-            // Remove selected class from all characters
-            characters.forEach(c => c.classList.remove('selected'));
-            
-            // Add selected class to chosen character
-            character.classList.add('selected');
-            
-            // Store selected character
-            gameState.character = character.dataset.name;
-            console.log("Selected character:", gameState.character);
-            
-            // Enable start button
+    try {
+        const characters = document.querySelectorAll('.character');
+        const startButton = document.getElementById('start-game');
+        
+        if (startButton) {
+            // Reset button state
+            startButton.disabled = true;
+            startButton.style.opacity = '0.7';
+        }
+        
+        // Set up basic click handlers on characters
+        characters.forEach(character => {
+            // Simple click handler
+            character.onclick = function() {
+                // Clear selected state from all characters
+                characters.forEach(c => c.classList.remove('selected'));
+                
+                // Mark this character as selected
+                this.classList.add('selected');
+                
+                // Store selected character
+                gameState.character = this.dataset.name;
+                
+                // Enable start button
+                if (startButton) {
+                    startButton.disabled = false;
+                    startButton.style.opacity = '1';
+                }
+            };
+        });
+        
+        // Set up start button click handler
+        if (startButton) {
+            startButton.onclick = function() {
+                if (gameState.character && !this.disabled) {
+                    // Start the game
+                    startGame();
+                }
+            };
+        }
+        
+        // Auto-select first character
+        if (characters.length > 0) {
+            characters[0].classList.add('selected');
+            gameState.character = characters[0].dataset.name;
             if (startButton) {
                 startButton.disabled = false;
-                startButton.style.cursor = 'pointer';
                 startButton.style.opacity = '1';
             }
-        };
-        
-        // Remove any existing event listeners
-        const newCharacter = character.cloneNode(true);
-        character.parentNode.replaceChild(newCharacter, character);
-        
-        // Add both click and touch handlers
-        newCharacter.addEventListener('click', handleCharacterSelect);
-        newCharacter.addEventListener('touchend', handleCharacterSelect);
-        
-        // Add visual feedback on touch
-        newCharacter.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.style.opacity = '0.8';
-        });
-        
-        // Reset visual state on touch cancel
-        newCharacter.addEventListener('touchcancel', function() {
-            this.style.opacity = '1';
-        });
-    });
-    
-    // Set up start button click and touch handlers
-    if (startButton) {
-        // Clear any existing handlers
-        startButton.onclick = null;
-        startButton.ontouchend = null;
-        
-        // Function to handle start button activation
-        const handleStartGame = function(e) {
-            // Prevent default touch behavior
-            if (e) {
-                e.preventDefault();
-            }
-            
-            if (gameState.character && !startButton.disabled) {
-                // Visual feedback
-                startButton.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    startButton.style.transform = '';
-                }, 100);
-                
-                // Play select sound if available
-                if (window.playSound) {
-                    window.playSound('select');
-                }
-                
-                console.log("Starting game with character:", gameState.character);
-                
-                // Small delay to ensure visual feedback is seen
-                setTimeout(() => {
-                    startGame();
-                }, 150);
-            }
-        };
-        
-        // Add both click and touch handlers
-        startButton.addEventListener('click', handleStartGame);
-        startButton.addEventListener('touchend', handleStartGame);
-        
-        // Also handle touchstart to provide feedback
-        startButton.addEventListener('touchstart', function(e) {
-            e.preventDefault(); // Prevent double tap zoom
-            if (!startButton.disabled) {
-                startButton.style.opacity = '0.8';
-            }
-        });
-        
-        // Reset visual state on touch cancel
-        startButton.addEventListener('touchcancel', function() {
-            startButton.style.opacity = startButton.disabled ? '0.7' : '1';
-            startButton.style.transform = '';
-        });
+        }
+    } catch (error) {
+        console.error("Error in character selection:", error);
     }
 }
 
@@ -626,9 +541,9 @@ function spawnReport() {
     
     // Adjust size for mobile devices
     const isMobile = window.innerWidth < 480;
-    const reportWidth = isMobile ? '100px' : '130px';
-    const reportHeight = isMobile ? '140px' : '160px';
-    const fontSize = isMobile ? '12px' : '14px';
+    const reportWidth = isMobile ? '130px' : '130px'; // Increased width for mobile
+    const reportHeight = isMobile ? '170px' : '160px'; // Increased height for mobile
+    const fontSize = isMobile ? '13px' : '14px'; // Slightly larger font for mobile
     
     report.style.width = reportWidth;
     report.style.height = reportHeight;
@@ -644,9 +559,19 @@ function spawnReport() {
     report.style.cursor = isBad ? 'pointer' : 'default';
     report.style.zIndex = '100';
     
-    // Make reports larger hit targets on mobile for easier tapping
-    if (isMobile && isBad) {
+    // Make reports better targets on mobile for easier tapping
+    if (isMobile) {
         report.style.touchAction = 'manipulation';
+        
+        // For bad reports that need to be fixed, add extra visual cues and a larger tap target
+        if (isBad) {
+            // Add pseudo-element to increase tap area (invisible larger target)
+            report.style.position = 'relative';
+            
+            // Make bad reports more noticeable on mobile
+            report.style.boxShadow = '0 0 20px rgba(255, 0, 0, 0.9)';
+            report.style.border = '2px solid rgba(255, 0, 0, 0.8)';
+        }
     }
     
     // Add paper texture and corner fold
@@ -791,7 +716,13 @@ function spawnReport() {
         }, 2000 + Math.random() * 1000);
     } else {
         // For bad reports, add click/touch handlers for better mobile response
-        const handleReportFix = function() {
+        const handleReportFix = function(e) {
+            // Prevent any default behavior
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
             // Skip if already handled
             if (report.classList.contains('fixed')) return;
             
@@ -846,12 +777,29 @@ function spawnReport() {
             }, 500);
         };
         
-        // Add both click and touch handlers
+        // Add both click and touch handlers with better mobile support
         report.addEventListener('click', handleReportFix);
+        
+        // Add touch handlers with better support for mobile devices
+        report.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // Prevent default touch behavior
+            // Set data attribute to track touch
+            report.setAttribute('data-touch-started', 'true');
+        }, { passive: false });
+        
         report.addEventListener('touchend', function(e) {
-            e.preventDefault(); // Prevent double events on mobile
-            handleReportFix();
-        });
+            e.preventDefault(); // Prevent default behavior
+            // Only fire if touch started on this element
+            if (report.getAttribute('data-touch-started') === 'true') {
+                report.removeAttribute('data-touch-started');
+                handleReportFix(e);
+            }
+        }, { passive: false });
+        
+        // Cancel the touch if moved too far
+        report.addEventListener('touchmove', function(e) {
+            report.removeAttribute('data-touch-started');
+        }, { passive: true });
         
         // Add expiration for bad reports - they disappear if not fixed
         setTimeout(() => {
@@ -947,63 +895,24 @@ function endGame() {
     if (reportsFixed) reportsFixed.textContent = gameState.fixedReports;
     if (levelsCompleted) levelsCompleted.textContent = gameState.level;
     
-    // Set up play again button with touch support
+    // Set up play again button - simplified version
     const playAgainButton = document.getElementById('play-again');
     if (playAgainButton) {
-        // Remove any existing event listeners by cloning the button
-        const newButton = playAgainButton.cloneNode(true);
-        if (playAgainButton.parentNode) {
-            playAgainButton.parentNode.replaceChild(newButton, playAgainButton);
-        }
-        
-        // Function to handle play again
-        const handlePlayAgain = function(e) {
-            // Prevent default touch behavior
-            if (e) {
-                e.preventDefault();
+        playAgainButton.onclick = function() {
+            // Go back to start screen
+            if (gameOverScreen) {
+                gameOverScreen.classList.add('hidden');
+                gameOverScreen.style.display = 'none';
             }
             
-            // Visual feedback
-            newButton.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                newButton.style.transform = '';
-            }, 100);
+            const startScreen = document.getElementById('start-screen');
+            if (startScreen) {
+                startScreen.classList.remove('hidden');
+                startScreen.style.display = 'flex';
+            }
             
-            console.log("Play again clicked/tapped");
-            
-            // Small delay to ensure visual feedback is seen
-            setTimeout(() => {
-                // Go back to start screen
-                if (gameOverScreen) {
-                    gameOverScreen.classList.add('hidden');
-                    gameOverScreen.style.display = 'none';
-                }
-                
-                const startScreen = document.getElementById('start-screen');
-                if (startScreen) {
-                    startScreen.classList.remove('hidden');
-                    startScreen.style.display = 'flex';
-                }
-                
-                resetGame();
-            }, 150);
+            resetGame();
         };
-        
-        // Add both click and touch handlers
-        newButton.addEventListener('click', handlePlayAgain);
-        newButton.addEventListener('touchend', handlePlayAgain);
-        
-        // Also handle touchstart to provide feedback
-        newButton.addEventListener('touchstart', function(e) {
-            e.preventDefault(); // Prevent double tap zoom
-            newButton.style.opacity = '0.8';
-        });
-        
-        // Reset visual state on touch cancel
-        newButton.addEventListener('touchcancel', function() {
-            newButton.style.opacity = '1';
-            newButton.style.transform = '';
-        });
     }
 }
 
